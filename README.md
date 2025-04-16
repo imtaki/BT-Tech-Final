@@ -9,25 +9,25 @@
 - Martin Rosík
 
 ## 🛠 Tech Stack  
-- **Frontend:** TBD  
+- **Frontend:** React.js + TypeScript + Tailwind
 - **Backend:** Laravel (PHP)  
 - **Database:** MySQL
 
 ## 📝 Description  
-The project is a content management system designed to archive and manage materials, records, and events related to Animal Science Days. The backend is built using Laravel and stores data in a MySQL database. The frontend stack will be finalized during development.
+The project is a content management system designed to archive and manage materials, records, and events related to Animal Science Days. The backend is built using Laravel and stores data in a MySQL database. The frontend is built with React.js and TypeScript.
 
 ## 📁 Project Structure
 
 ```plaintext
 be-final/
-├── frontend/                  # Frontend application (Framework TBD)
+├── frontend/                  # Frontend application (React.js)
 │   ├── public/                # Static assets and entry HTML
 │   ├── src/                   # Source code
 │   │   ├── assets/            # Images, fonts, etc.
 │   │   ├── components/        # Reusable UI components
-│   │   ├── pages/             # Page components
-│   │   ├── utils/             # Utility functions
-│   │   └── App.js             # Root component
+│   │   └── App.tsx            # Root component
+│   │   └── main.tsx           # Main file
+│   │   └── index.css          # Main CSS file (Tailwind)
 │   ├── package.json           # Dependencies and scripts
 │   └── .env                   # Environment variables
 │
