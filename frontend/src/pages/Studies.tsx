@@ -1,7 +1,7 @@
 export default function Studies() {
   return (
     <>
-    <h1>Studies page</h1>
+    <h1 className="text-3xl">Studies page</h1>
     </>
   )
 }

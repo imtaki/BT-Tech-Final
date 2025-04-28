@@ -1,5 +1,7 @@
 export default function Home() {
     return (
-    <div>Lorem ipsum</div>
+    <>
+    <h1 className="text-3xl">Animal Science Days</h1>
+    </>
     )
 }
