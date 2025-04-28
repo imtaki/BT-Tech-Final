@@ -1,7 +1,7 @@
 import "../index.css";
 import logoKonferencie from "../assets/img/logo.png";
 import { IoKey } from "react-icons/io5";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 
 export default function NavBar() {
     const navItems = [
@@ -10,7 +10,8 @@ export default function NavBar() {
         { id: 2, label: "About Boku", href: "/about" },
     ];
 
-    const currentPath = window.location.pathname;
+    const location = useLocation();
+    const currentPath = location.pathname;
 
     return (
         <nav className="py-4 p-3">
