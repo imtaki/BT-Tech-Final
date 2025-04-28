@@ -10,7 +10,7 @@ export default function NavBar() {
     const currentPath = window.location.pathname;
 
     return (
-        <nav className="py-4">
+        <nav className="py-4 p-3">
             <div className="mx-auto max-h-screen px-4 flex justify-between items-center">
                 <a href="/">
                     <span className="text-4xl font-extrabold text-green-700">Boku University</span>
