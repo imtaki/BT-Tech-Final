@@ -1,6 +1,7 @@
 import "../index.css";
 import logoKonferencie from "../assets/img/logo.png";
 import { IoKey } from "react-icons/io5";
+import { Link } from "react-router";
 
 export default function NavBar() {
     const navItems = [
@@ -14,15 +15,15 @@ export default function NavBar() {
     return (
         <nav className="py-4 p-3">
             <div className="mx-auto max-h-screen px-4 flex justify-between items-center">
-                <a className="flex flex-row justify-between" href="/">
+                <Link className="flex flex-row justify-between" to="/">
                     <img className="h-36" src={logoKonferencie} alt="Boku University Logo"/>
                     <span className="flex justify-center items-center text-4xl font-extrabold text-gray-700">Boku University</span>
-                </a>
+                </Link>
                 <ul className="flex space-x-6 text-gray-700 font-medium">
                     {navItems.map((item) => (
                         <li key={item.id}>
-                            <a
-                                href={item.href}
+                            <Link
+                                to={item.href}
                                 className={
                                     currentPath === item.href
                                       ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
@@ -30,11 +31,11 @@ export default function NavBar() {
                                   }
                             >
                                 {item.label}
-                            </a>
+                            </Link>
                         </li>
                     ))}
                     <li className=" hover:text-orange-400 hover:underline underline-offset-4">
-                      <a className="flex flex-row gap-1 text-xl font-bold" href="/login"><IoKey className="text-2xl" /> Login</a>
+                      <Link className="flex flex-row gap-1 text-xl font-bold" to="/login"><IoKey className="text-2xl" /> Login</Link>
                     </li>
                 </ul>
             </div>
