@@ -14,7 +14,7 @@ export default function NavBar() {
     const currentPath = location.pathname;
 
     return (
-        <nav className="py-4 p-3">
+        <nav className="py-1 p-2">
             <div className="mx-auto max-h-screen px-4 flex justify-between items-center">
                 <Link className="flex flex-row justify-between" to="/">
                     <img className="h-36" src={logoKonferencie} alt="Boku University Logo"/>

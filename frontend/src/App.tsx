@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import About from './pages/About';
 import Research from './pages/Research';
 import Studies from './pages/Studies';
+import AdminLayout from './components/AdminLayout';
+import AdminPanel from './pages/AdminPanel';
 export default function App() {
   return (
     <>
@@ -17,7 +19,12 @@ export default function App() {
                 <Route path='/research' element={<Research />} />
                 <Route path='/studies' element={<Studies />} />
             </Route>
+            
             <Route path='/login' element={<Login />} />
+
+            <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminPanel />} />
+             </Route>
         </Routes>
       </BrowserRouter>
     </>
