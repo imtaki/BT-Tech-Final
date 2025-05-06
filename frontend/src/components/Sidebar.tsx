@@ -4,7 +4,7 @@ export default function Sidebar() {
   return (
     <div className="w-64 bg-gray-100 h-screen border-r border-gray-300">
       <div className="p-4 border-b border-gray-300 bg-gray-700 text-white">
-        <h2 className="text-xl font-bold text-center">Animal Science Days</h2>
+        <h2 className="text-xl font-bold text-center">Conference Years</h2>
       </div>
       
       <div className="py-4">

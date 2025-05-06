@@ -7,7 +7,7 @@ export default function NavBar() {
     const navItems = [
         { id: 0, label: "Studies", href: "/studies" },
         { id: 1, label: "Research", href: "/research" },
-        { id: 2, label: "About Boku", href: "/about" },
+        { id: 2, label: "About", href: "/about" },
     ];
 
     const location = useLocation();
@@ -18,7 +18,7 @@ export default function NavBar() {
             <div className="mx-auto max-h-screen px-4 flex justify-between items-center">
                 <Link className="flex flex-row justify-between" to="/">
                     <img className="h-36" src={logoKonferencie} alt="Boku University Logo"/>
-                    <span className="flex justify-center items-center text-4xl font-extrabold text-gray-700">Boku University</span>
+                    <span className="flex justify-center items-center text-4xl font-extrabold text-gray-700">Animal Science Days</span>
                 </Link>
                 <ul className="flex space-x-6 text-gray-700 font-medium">
                     {navItems.map((item) => (
