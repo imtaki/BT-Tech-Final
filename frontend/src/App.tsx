@@ -8,6 +8,7 @@ import Research from './pages/Research';
 import Studies from './pages/Studies';
 import AdminLayout from './components/AdminLayout';
 import AdminPanel from './pages/AdminPanel';
+import NotFound from './pages/NotFound'
 export default function App() {
   return (
     <>
@@ -24,7 +25,8 @@ export default function App() {
 
             <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminPanel />} />
-             </Route>
+            </Route>
+            <Route path='*' element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </>
