@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: 'http://http://127.0.0.1:8000/api',
+    baseURL: 'http://127.0.0.1:8000/api',
     withCredentials: true,
     headers: {
       'Content-Type': 'application/json'
@@ -18,4 +18,4 @@ const api = axios.create({
     return Promise.reject(error);
   });
   
-  export default axios;
+  export default api;
