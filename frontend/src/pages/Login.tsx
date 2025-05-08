@@ -4,7 +4,6 @@ import api from "../utils/axios";
 
 export default function Login() {
   const [formData, setFormData] = useState({email: '',password: ''});
-  // const [error, setError] = useState("");
   const navigate = useNavigate();
 
 
@@ -24,7 +23,6 @@ export default function Login() {
       const { access_token, token_type, user } = res.data;
       const { role } = user;
   
-      console.log("Login successful:", { access_token, user, role });
   
       localStorage.setItem('token', access_token);
       localStorage.setItem('user', JSON.stringify(user));

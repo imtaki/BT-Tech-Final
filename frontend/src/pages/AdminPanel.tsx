@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
 import { Link } from 'react-router';
+import { getUser } from '../utils/auth';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -14,10 +15,14 @@ export default function AdminPanel() {
     { id: 2, year: '2025', title: 'Registrácia' },
   ];
 
+  const user = getUser();
+
+
   return (
     <div className="p-6 bg-gray-100">
       <div className="mb-6">
         <div className="border-b border-gray-200">
+          <h3 className='text-xl'>Welcome  {user.name}</h3>
           <nav className="-mb-px flex space-x-8">
             <Link
               to="" 

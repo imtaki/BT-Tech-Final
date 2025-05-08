@@ -1,7 +1,9 @@
 import "../index.css";
 import logoKonferencie from "../assets/img/logo.png";
 import { IoKey } from "react-icons/io5";
-import { Link, useLocation } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
+import { getRole, isLoggedIn  } from "../utils/auth";
+import { IoLogOutOutline } from "react-icons/io5";
 
 export default function NavBar() {
     const navItems = [
@@ -10,7 +12,18 @@ export default function NavBar() {
         { id: 2, label: "About", href: "/about" },
     ];
 
+    const loggedIn = isLoggedIn();
+    const role = getRole();
+
+    function handleLogout() {
+        localStorage.removeItem('token')
+        localStorage.removeItem('role')
+        localStorage.removeItem('user')
+        navigate("/login");
+    }
+
     const location = useLocation();
+    const navigate = useNavigate();
     const currentPath = location.pathname;
 
     return (
@@ -35,9 +48,30 @@ export default function NavBar() {
                             </Link>
                         </li>
                     ))}
-                    <li className=" hover:text-orange-400 hover:underline underline-offset-4">
-                      <Link className="flex flex-row gap-1 text-xl font-bold" to="/login"><IoKey className="text-2xl" /> Login</Link>
-                    </li>
+                    {!loggedIn && (
+                        <li className="hover:text-orange-400 hover:underline underline-offset-4">
+                        <Link className="flex flex-row gap-1 text-xl font-bold" to="/login"><IoKey className="text-2xl" /> Login</Link>
+                      </li>
+                    )}
+
+                    {role == "admin" && (
+                        <li className="hover:text-orange-400 hover:underline underline-offset-2">
+                            <Link  className={currentPath === '/admin'
+                                      ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
+                                      : "hover:text-orange-400 hover:underline underline-offset-2"
+                                  } 
+                                  
+                                to="/admin"> Admin
+                            </Link>
+                      </li>
+                    )}
+
+                    {loggedIn && (
+                        <li className=" hover:text-orange-400 hover:underline underline-offset-4">
+                            <button className="flex flex-row gap-1 text-xl font-bold" onClick={handleLogout}><IoLogOutOutline  className="text-2xl"/> Logout</button>
+                      </li>
+                    )}
+
                 </ul>
             </div>
         </nav>
