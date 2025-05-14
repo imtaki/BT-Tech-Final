@@ -1,12 +1,16 @@
 
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
-import { Link } from 'react-router';
+import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
+import api from "../utils/axios.ts";
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const [errorMessage, setMessage] = useState("");
 
+  const navigate = useNavigate();
   const years = ['2025', '2024'];
   const editors = ['Jan Novák', 'Eva Malá'];
   const admins = ['admin@boku.sk', 'director@boku.sk'];
@@ -17,6 +21,23 @@ export default function AdminPanel() {
 
   const user = getUser();
 
+  useEffect(() => {
+    const checkAuthorization = async () => {
+      try {
+        await api.get("/admin");
+        setAuthorized(true);
+      } catch(e: any) {
+        setAuthorized(false);
+        setMessage(e.response.statusText);
+        navigate("/");
+      }
+    }
+    checkAuthorization()
+  }, []);
+
+  if(!authorized) {
+    return <p>{errorMessage}</p>
+  }
 
   return (
     <div className="p-6 bg-gray-100">
