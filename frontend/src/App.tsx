@@ -9,6 +9,9 @@ import Studies from './pages/Studies';
 import AdminLayout from './components/AdminLayout';
 import AdminPanel from './pages/AdminPanel';
 import NotFound from './pages/NotFound';
+import WysiwygEditor from "./pages/WysiwygEditor.tsx";
+
+
 export default function App() {
   return (
     <>
@@ -19,6 +22,7 @@ export default function App() {
                 <Route path='/about' element={<About />} />
                 <Route path='/research' element={<Research />} />
                 <Route path='/studies' element={<Studies />} />
+                <Route path='/test' element={<WysiwygEditor />}/>
             </Route>
             
             <Route path='/login' element={<Login />} />
