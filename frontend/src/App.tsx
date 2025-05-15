@@ -9,7 +9,7 @@ import Studies from './pages/Studies';
 import AdminLayout from './components/AdminLayout';
 import AdminPanel from './pages/AdminPanel';
 import NotFound from './pages/NotFound';
-import WysiwygEditor from "./pages/WysiwygEditor.tsx";
+import Test from "./pages/Test.tsx";
 
 
 export default function App() {
@@ -22,7 +22,7 @@ export default function App() {
                 <Route path='/about' element={<About />} />
                 <Route path='/research' element={<Research />} />
                 <Route path='/studies' element={<Studies />} />
-                <Route path='/test' element={<WysiwygEditor />}/>
+                <Route path='/test' element={<Test />}/>
             </Route>
             
             <Route path='/login' element={<Login />} />
