@@ -107,6 +107,32 @@ export default function NavBar() {
                         </Link>
                     </li>
                 ))}
+                {!loggedIn && (
+                    <li className="hover:text-orange-400 hover:underline underline-offset-4 p-2">
+                        <Link className="flex flex-row gap-1 text-xl font-bold" to="/login"><IoKey
+                            className="text-2xl"/> Login</Link>
+                    </li>
+                )}
+
+                {role == "admin" && (
+                    <li className="hover:text-orange-400 hover:underline underline-offset-2 p-2">
+                        <Link className={currentPath === '/admin'
+                            ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
+                            : "hover:text-orange-400 hover:underline underline-offset-2"
+                        }
+
+                              to="/admin"> Admin
+                        </Link>
+                    </li>
+                )}
+
+                {loggedIn && (
+                    <li className=" hover:text-orange-400 hover:underline underline-offset-4 p-2">
+                        <button className="flex flex-row gap-1 text-xl font-bold" onClick={handleLogout}>
+                            <IoLogOutOutline className="text-2xl"/> Logout
+                        </button>
+                    </li>
+                )}
             </ul>
         </>
     );
