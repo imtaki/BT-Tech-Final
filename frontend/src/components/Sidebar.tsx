@@ -1,9 +1,26 @@
 import { Link } from "react-router";
 import { BiSolidRightArrow, BiSolidLeftArrow } from "react-icons/bi";
-import {useState} from "react";
+import {useState, useEffect} from "react";
+import api from "../utils/axios";
 
 export default function Sidebar() {
     const [sidebarActive, setSidebarActive] = useState(false);
+    const [conferenceYears, setConferenceYears] = useState([]);
+    const [errorMessage, setMessage] = useState("");
+
+
+    useEffect (() => {
+        const fetchConferenceYears = async () => {
+        try {
+            const res = await api.get("/conference-years");
+            setConferenceYears(res.data)
+        } catch (error: any) {
+        setMessage(error.response.statusText);
+    }
+   }
+    fetchConferenceYears();
+  }, []);
+
     return (
         <>
             <div className={`${sidebarActive ? "left-56 ease-in-out duration-300" : "left-[-100%] ease-in-out duration-300"} lg:hidden fixed top-[50%] z-20 bg-orange-400 border-2 border-orange-400 rounded-tl-lg rounded-bl-lg`}>
@@ -21,18 +38,14 @@ export default function Sidebar() {
 
                 <div className="py-4">
                     <div className="pl-4 mt-4">
-                        <div className="mb-2 flex items-center">
+                        {conferenceYears.map((yearObj) => (
+                         <div key={yearObj.id} className="mb-2 flex items-center">
                             <div className="h-4 w-1 bg-orange-400 mr-2"></div>
-                            <Link to="/2025" className="block py-1">2025</Link>
+                            <Link to={`/${yearObj.year}`} className="block py-1">
+                                {yearObj.year}
+                            </Link>
                         </div>
-                        <div className="mb-2 flex items-center">
-                            <div className="h-4 w-1 bg-orange-400 mr-2"></div>
-                            <Link to="/2024" className="block py-1">2024</Link>
-                        </div>
-                        <div className="mb-2 flex items-center">
-                            <div className="h-4 w-1 bg-orange-400 mr-2"></div>
-                            <Link to="/2023" className="block py-1">2023</Link>
-                        </div>
+                     ))}
                     </div>
 
                 </div>

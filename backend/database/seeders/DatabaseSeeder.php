@@ -20,5 +20,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@example.com',
             'password' => bcrypt('test123'),
         ]);
+
+        $this->call(ConferenceYearSeeder::class);
     }
 }
