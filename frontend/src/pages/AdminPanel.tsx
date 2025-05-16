@@ -40,11 +40,11 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="p-6 bg-gray-100">
+    <div className="p-6 bg-gray-100 mt-24 lg:mt-36">
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <h3 className='text-xl'>Welcome  {user.name}</h3>
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px mt-4 grid grid-cols-2 lg:flex gap-x-10 space-x-8">
             <Link
               to="" 
               onClick={() => setActiveTab('years')}
@@ -97,7 +97,7 @@ export default function AdminPanel() {
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Ročníky konferencie</h2>
           
-          <div className="flex mb-4">
+          <div className="flex flex-col gap-4 lg:flex-row mb-4">
             <input
               type="text"
               placeholder="Rok konferencie (napr. 2026)"
@@ -136,7 +136,7 @@ export default function AdminPanel() {
               placeholder="E-mail editora"
               className="w-full border px-3 py-2 rounded"
             />
-            <div className="flex">
+            <div className="flex flex-col gap-2 lg:flex-row">
               <select className="flex-grow border px-3 py-2 rounded-l">
                 {years.map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -150,9 +150,9 @@ export default function AdminPanel() {
           
           <ul className="divide-y divide-gray-200">
             {editors.map((editor) => (
-              <li key={editor} className="py-3 flex items-center justify-between">
+              <li key={editor} className="py-3 flex flex-col lg:flex-row items-start gap-2">
                 <span className="font-medium">{editor}</span>
-                <div className="flex space-x-2">
+                <div className="flex flex-col lg:flex-row gap-2 space-x-2">
                   <select className="border px-3 py-1 rounded">
                     <option value="">Prideliť k ročníku</option>
                     {years.map(year => (
@@ -173,7 +173,7 @@ export default function AdminPanel() {
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Administrátori</h2>
           
-          <div className="flex mb-4">
+          <div className="flex flex-col gap-2 lg:flex-row mb-4">
             <input
               type="email"
               placeholder="E-mail administrátora"
@@ -186,7 +186,7 @@ export default function AdminPanel() {
           
           <ul className="divide-y divide-gray-200">
             {admins.map((admin) => (
-              <li key={admin} className="py-3 flex items-center justify-between">
+              <li key={admin} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
                 <span className="font-medium">{admin}</span>
                 <button className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
                   <FaMinus className="mr-1" /> Odstrániť
@@ -207,7 +207,7 @@ export default function AdminPanel() {
               placeholder="Názov podstránky"
               className="w-full border px-3 py-2 rounded"
             />
-            <div className="flex">
+            <div className="flex flex-col lg:flex-row gap-2">
               <select className="flex-grow border px-3 py-2 rounded-l">
                 {years.map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -218,44 +218,48 @@ export default function AdminPanel() {
               </button>
             </div>
           </div>
-          
-          <table className="min-w-full divide-y divide-gray-200 border">
-            <thead className="bg-gray-50">
+          <div className="w-full overflow-x-scroll lg:overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200 border">
+              <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Rok
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Podstránka
                 </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col"
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Akcie
                 </th>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
               {subpages.map((subpage) => (
-                <tr key={subpage.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {subpage.year}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {subpage.title}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <button className="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
-                        <FaEdit className="mr-1" /> Editovať
-                      </button>
-                      <button className="bg-red-500 text-white px-2 py-1 rounded flex items-center">
-                        <FaMinus className="mr-1" /> Odstrániť
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                  <tr key={subpage.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {subpage.year}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {subpage.title}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end space-x-2">
+                        <button className="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
+                          <FaEdit className="mr-1"/> Editovať
+                        </button>
+                        <button className="bg-red-500 text-white px-2 py-1 rounded flex items-center">
+                          <FaMinus className="mr-1"/> Odstrániť
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
               ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
