@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\ConferenceYearController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -13,3 +14,5 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api')
 Route::middleware(['auth:api', 'role.check'])->get('/admin', function(Request $request) {
    return response()->json(["message" => "Accesed admin panel."]);
 });
+
+Route::apiResource('conference-years', ConferenceYearController::class);
