@@ -9,9 +9,9 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [errorMessage, setMessage] = useState("");
-
+  const [conferenceYears, setConferenceYears] = useState([]);
+  const [newYear, setNewYear] = useState("");
   const navigate = useNavigate();
-  const years = ['2025', '2024'];
   const editors = ['Jan Novák', 'Eva Malá'];
   const admins = ['admin@boku.sk', 'director@boku.sk'];
   const subpages = [
@@ -34,6 +34,37 @@ export default function AdminPanel() {
     }
     checkAuthorization()
   }, []);
+
+  useEffect (() => {
+    const fetchConferenceYears = async () => {
+    try {
+      const res = await api.get("/conference-years");
+      setConferenceYears(res.data)
+    } catch (error: any) {
+      setMessage(error.response.statusText);
+    }
+   }
+   fetchConferenceYears();
+  }, []);
+
+  const handleAddYear = async () => {
+    try {
+      const res = await api.post("/conference-years", { year: newYear })
+      setConferenceYears(prev => [res.data, ...prev]);
+      setNewYear("")
+    } catch (error: any) {
+        setMessage(error)
+    }
+  }
+
+  const handleDeleteYear = async (id: number) => {
+    try {
+      const res = await api.delete(`/conference-years/${id}`)
+      setConferenceYears(prev => prev.filter(year => year.id !== id));
+    } catch (error: any) {
+      setMessage(error)
+    }
+  }
 
   if(!authorized) {
     return <p>{errorMessage}</p>
@@ -100,19 +131,21 @@ export default function AdminPanel() {
           <div className="flex flex-col gap-4 lg:flex-row mb-4">
             <input
               type="text"
+              value={newYear}
+              onChange={(e) => setNewYear(e.target.value)}
               placeholder="Rok konferencie (napr. 2026)"
               className="flex-grow border px-3 py-2 rounded-l"
             />
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
+            <button onClick={handleAddYear} className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
               <FaPlus className="mr-1" /> Pridať
             </button>
           </div>
           
           <ul className="divide-y divide-gray-200">
-            {years.map((year) => (
-              <li key={year} className="py-3 flex items-center justify-between">
-                <span className="font-medium">{year}</span>
-                <button className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
+            {conferenceYears.map((yearObj) => (
+              <li key={yearObj.id} className="py-3 flex items-center justify-between">
+                <span className="font-medium">{yearObj.year}</span>
+                <button onClick={() => handleDeleteYear(yearObj.id)} className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
                   <FaMinus className="mr-1" /> Odstrániť
                 </button>
               </li>
@@ -138,8 +171,8 @@ export default function AdminPanel() {
             />
             <div className="flex flex-col gap-2 lg:flex-row">
               <select className="flex-grow border px-3 py-2 rounded-l">
-                {years.map(year => (
-                  <option key={year} value={year}>{year}</option>
+                {conferenceYears.map(yearObj => (
+                  <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
                 ))}
               </select>
               <button className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
@@ -155,8 +188,8 @@ export default function AdminPanel() {
                 <div className="flex flex-col lg:flex-row gap-2 space-x-2">
                   <select className="border px-3 py-1 rounded">
                     <option value="">Prideliť k ročníku</option>
-                    {years.map(year => (
-                      <option key={year} value={year}>{year}</option>
+                    {conferenceYears.map(yearObj => (
+                      <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
                     ))}
                   </select>
                   <button className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
@@ -209,8 +242,8 @@ export default function AdminPanel() {
             />
             <div className="flex flex-col lg:flex-row gap-2">
               <select className="flex-grow border px-3 py-2 rounded-l">
-                {years.map(year => (
-                  <option key={year} value={year}>{year}</option>
+                {conferenceYears.map(yearObj => (
+                  <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
                 ))}
               </select>
               <button className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
