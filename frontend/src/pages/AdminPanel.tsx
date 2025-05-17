@@ -4,20 +4,20 @@ import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
 import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
+import {AxiosError} from "axios";
+import {conferenceYear, subpageData} from "../types.ts";
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
   const [authorized, setAuthorized] = useState<boolean | null>(null);
-  const [errorMessage, setMessage] = useState("");
-  const [conferenceYears, setConferenceYears] = useState([]);
+  const [conferenceYears, setConferenceYears] = useState<conferenceYear[]>([]);
   const [newYear, setNewYear] = useState("");
+  const [subpages, setSubpages] = useState<subpageData[]>([]);
+  const [subpageTitle, setSubpageTitle] = useState("");
+  const [subpageYear, setSubpageYear] = useState(new Date().getFullYear().toString()); // OP Pro fix - lebo sa mi to nechcelo inak logovat, funguje aj na buduce roky!
   const navigate = useNavigate();
   const editors = ['Jan Novák', 'Eva Malá'];
   const admins = ['admin@boku.sk', 'director@boku.sk'];
-  const subpages = [
-    { id: 1, year: '2025', title: 'Program' },
-    { id: 2, year: '2025', title: 'Registrácia' },
-  ];
 
   const user = getUser();
 
@@ -26,9 +26,11 @@ export default function AdminPanel() {
       try {
         await api.get("/admin");
         setAuthorized(true);
-      } catch(e: any) {
+      } catch(e: unknown) {
         setAuthorized(false);
-        setMessage(e.response.statusText);
+        if (e instanceof AxiosError){
+          console.log(e?.response?.statusText);
+        }
         navigate("/");
       }
     }
@@ -40,34 +42,68 @@ export default function AdminPanel() {
     try {
       const res = await api.get("/conference-years");
       setConferenceYears(res.data)
-    } catch (error: any) {
-      setMessage(error.response.statusText);
+    } catch (e: unknown) {
+      if (e instanceof AxiosError){
+        console.log(e?.response?.statusText);
+      }
     }
    }
    fetchConferenceYears();
   }, []);
 
+  useEffect(() => {
+    const fetchSubpages = async () => {
+      try {
+        const res = await api.get("/subpages");
+        setSubpages(res.data)
+      } catch (e: unknown) {
+        if (e instanceof AxiosError){
+          console.log(e?.response?.statusText);
+        }
+      }
+    }
+    fetchSubpages();
+  }, []);
+
   const handleAddYear = async () => {
     try {
       const res = await api.post("/conference-years", { year: newYear })
-      setConferenceYears(prev => [res.data, ...prev]);
+      setConferenceYears(prev => [res.data, ...prev].sort((a: conferenceYear,b: conferenceYear) => b.year - a.year));
       setNewYear("")
-    } catch (error: any) {
-        setMessage(error)
+    } catch (e: unknown) {
+      console.log(e)
     }
   }
 
   const handleDeleteYear = async (id: number) => {
     try {
-      const res = await api.delete(`/conference-years/${id}`)
-      setConferenceYears(prev => prev.filter(year => year.id !== id));
-    } catch (error: any) {
-      setMessage(error)
+      await api.delete(`/conference-years/${id}`)
+      setConferenceYears(prev => prev.filter((year: conferenceYear) => year.id !== id));
+    } catch (e: unknown) {
+      console.log(e)
+    }
+  }
+
+  const handleAddSubpage = async () => {
+    try {
+      const res = await api.post("/subpages", {title: subpageTitle, year: Number(subpageYear)})
+      setSubpages(prev => [res.data.data, ...prev].sort((a: subpageData, b: subpageData) => b.year - a.year))
+    } catch (e: unknown) {
+      console.log(e);
+    }
+  }
+
+  const handleDeleteSubpage = async (subpage: number) => {
+    try {
+      await api.delete(`/subpages/${subpage}`)
+      setSubpages(prev => prev.filter((subpages: subpageData) => subpages.id != subpage))
+    } catch (e: unknown) {
+      console.log(e)
     }
   }
 
   if(!authorized) {
-    return <p>{errorMessage}</p>
+    return null
   }
 
   return (
@@ -142,7 +178,7 @@ export default function AdminPanel() {
           </div>
           
           <ul className="divide-y divide-gray-200">
-            {conferenceYears.map((yearObj) => (
+            {conferenceYears.map((yearObj: conferenceYear) => (
               <li key={yearObj.id} className="py-3 flex items-center justify-between">
                 <span className="font-medium">{yearObj.year}</span>
                 <button onClick={() => handleDeleteYear(yearObj.id)} className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
@@ -171,7 +207,7 @@ export default function AdminPanel() {
             />
             <div className="flex flex-col gap-2 lg:flex-row">
               <select className="flex-grow border px-3 py-2 rounded-l">
-                {conferenceYears.map(yearObj => (
+                {conferenceYears.map((yearObj: conferenceYear) => (
                   <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
                 ))}
               </select>
@@ -188,7 +224,7 @@ export default function AdminPanel() {
                 <div className="flex flex-col lg:flex-row gap-2 space-x-2">
                   <select className="border px-3 py-1 rounded">
                     <option value="">Prideliť k ročníku</option>
-                    {conferenceYears.map(yearObj => (
+                    {conferenceYears.map((yearObj: conferenceYear) => (
                       <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
                     ))}
                   </select>
@@ -239,14 +275,15 @@ export default function AdminPanel() {
               type="text"
               placeholder="Názov podstránky"
               className="w-full border px-3 py-2 rounded"
+              onChange={(e) => setSubpageTitle(e.target.value)}
             />
             <div className="flex flex-col lg:flex-row gap-2">
-              <select className="flex-grow border px-3 py-2 rounded-l">
-                {conferenceYears.map(yearObj => (
+              <select className="flex-grow border px-3 py-2 rounded-l" onChange={(e) => setSubpageYear(e.target.value)}>
+                {conferenceYears.map((yearObj: conferenceYear) => (
                   <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
                 ))}
               </select>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
+              <button onClick={handleAddSubpage} className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
                 <FaPlus className="mr-1" /> Pridať podstránku
               </button>
             </div>
@@ -270,7 +307,7 @@ export default function AdminPanel() {
               </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-              {subpages.map((subpage) => (
+              {subpages.map((subpage: subpageData) => (
                   <tr key={subpage.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {subpage.year}
@@ -283,7 +320,7 @@ export default function AdminPanel() {
                         <button className="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
                           <FaEdit className="mr-1"/> Editovať
                         </button>
-                        <button className="bg-red-500 text-white px-2 py-1 rounded flex items-center">
+                        <button onClick={() => handleDeleteSubpage(subpage.id)} className="bg-red-500 text-white px-2 py-1 rounded flex items-center">
                           <FaMinus className="mr-1"/> Odstrániť
                         </button>
                       </div>
