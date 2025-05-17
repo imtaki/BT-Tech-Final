@@ -7,4 +7,5 @@ export type subpageData = {
     id: number,
     year: number,
     title: string,
+    content: string,
 }

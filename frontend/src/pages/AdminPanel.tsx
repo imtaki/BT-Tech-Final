@@ -58,7 +58,7 @@ export default function AdminPanel() {
         setSubpages(res.data)
       } catch (e: unknown) {
         if (e instanceof AxiosError){
-          console.log(e?.response?.statusText);
+          console.log(e.response?.statusText);
         }
       }
     }
@@ -317,10 +317,13 @@ export default function AdminPanel() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
-                        <button className="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
-                          <FaEdit className="mr-1"/> Editovať
-                        </button>
-                        <button onClick={() => handleDeleteSubpage(subpage.id)} className="bg-red-500 text-white px-2 py-1 rounded flex items-center">
+                        <Link to={{pathname: "/subpage/edit/" + subpage.id}}>
+                          <button className="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
+                            <FaEdit className="mr-1"/> Editovať
+                          </button>
+                        </Link>
+                        <button onClick={() => handleDeleteSubpage(subpage.id)}
+                                className="bg-red-500 text-white px-2 py-1 rounded flex items-center">
                           <FaMinus className="mr-1"/> Odstrániť
                         </button>
                       </div>
