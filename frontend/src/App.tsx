@@ -11,6 +11,7 @@ import AdminPanel from './pages/AdminPanel';
 import NotFound from './pages/NotFound';
 import EditSubpage from "./pages/EditSubpage.tsx";
 import EditLayout from "./components/EditLayout.tsx";
+import EditorPanel from "./pages/EditorPanel.tsx";
 
 
 export default function App() {
@@ -29,6 +30,10 @@ export default function App() {
 
             <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminPanel />} />
+            </Route>
+
+            <Route path="/editor" element={<EditLayout/>}>
+              <Route index element={<EditorPanel />} />
             </Route>
 
             <Route path="/subpage/edit/" element={<EditLayout/>}>
