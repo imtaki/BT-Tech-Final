@@ -13,5 +13,11 @@ export type subpageData = {
 export type adminUser = {
     id: number,
     email: string,
-    username: string
+    name: string
+}
+
+export type editorUser = {
+    id: number,
+    email: string,
+    name: string
 }
