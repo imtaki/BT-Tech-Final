@@ -4,8 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\AdminController;
-use App\Http\Controllers\api\EditorController;
-use App\Http\Controllers\Api\SubpageController;
+use App\Http\Controllers\Api\EditorController;
+use App\Http\Controllers\Api\SubPageController;
 use App\Http\Controllers\Api\ConferenceYearController;
 
 Route::get('/user', function (Request $request) {
@@ -14,8 +14,11 @@ Route::get('/user', function (Request $request) {
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-Route::middleware(['auth:api', 'role.check'])->get('/admin', function(Request $request) {
-   return response()->json(["message" => "Accessed admin panel."]);
+Route::middleware(['auth:api', 'role.check'])->group(function () {
+    Route::get('/admin', fn(Request $request) =>
+        response()->json(["message" => "Accessed admin panel."]));
+    Route::get('/editor', fn(Request $request) =>
+        response()->json(["message" => "Accessed editor panel."]));
 });
 
 Route::apiResource('conference-years', ConferenceYearController::class);
