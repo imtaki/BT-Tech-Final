@@ -5,7 +5,7 @@ import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
-import {conferenceYear, subpageData} from "../types.ts";
+import {conferenceYear, subpageData, adminUser} from "../types.ts";
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -15,9 +15,10 @@ export default function AdminPanel() {
   const [subpages, setSubpages] = useState<subpageData[]>([]);
   const [subpageTitle, setSubpageTitle] = useState("");
   const [subpageYear, setSubpageYear] = useState(new Date().getFullYear().toString()); // OP Pro fix - lebo sa mi to nechcelo inak logovat, funguje aj na buduce roky!
+  const [admins, setAdmins] = useState<adminUser[]>([]);
+  const [newAdmin, setNewAdmin] = useState("");
   const navigate = useNavigate();
   const editors = ['Jan Novák', 'Eva Malá'];
-  const admins = ['admin@boku.sk', 'director@boku.sk'];
 
   const user = getUser();
 
@@ -65,6 +66,20 @@ export default function AdminPanel() {
     fetchSubpages();
   }, []);
 
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const res = await api.get("/admins");
+        setAdmins(res.data);
+      } catch (e: unknown) {
+        if (e instanceof AxiosError){
+          console.log(e.response?.statusText);
+        }
+      }
+    }
+    fetchAdmins();
+  }, []);
+
   const handleAddYear = async () => {
     try {
       const res = await api.post("/conference-years", { year: newYear })
@@ -101,6 +116,25 @@ export default function AdminPanel() {
       console.log(e)
     }
   }
+
+    const handleAddAdmin = async () => {
+      try {
+        const res = await api.post("/admins", { email: newAdmin });
+        setAdmins(prev => [...prev, res.data]);
+        setNewAdmin("");
+      } catch (e: unknown) {
+        console.error("Failed to add admin", e);
+      }
+    }
+
+    const handleDeleteAdmin = async (adminId: number) => {
+      try {
+        await api.delete(`/admins/${adminId}`);
+        setAdmins(prev => prev.filter(admin => admin.id !== adminId));
+      } catch (e: unknown) {
+        console.log(e);
+      }
+    }
 
   if(!authorized) {
     return null
@@ -245,19 +279,21 @@ export default function AdminPanel() {
           <div className="flex flex-col gap-2 lg:flex-row mb-4">
             <input
               type="email"
+              value={newAdmin}
+              onChange={(e) => setNewAdmin(e.target.value)}
               placeholder="E-mail administrátora"
               className="flex-grow border px-3 py-2 rounded-l"
             />
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
+            <button  onClick={handleAddAdmin} className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
               <FaPlus className="mr-1" /> Pridať
             </button>
           </div>
           
           <ul className="divide-y divide-gray-200">
-            {admins.map((admin) => (
-              <li key={admin} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
-                <span className="font-medium">{admin}</span>
-                <button className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
+            {admins.map((adminObj) => (
+              <li key={adminObj.id} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
+                <span className="font-medium">{adminObj.email}</span>
+                <button onClick={() => handleDeleteAdmin(adminObj.id)} className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
                   <FaMinus className="mr-1" /> Odstrániť
                 </button>
               </li>
