@@ -9,7 +9,8 @@ import Studies from './pages/Studies';
 import AdminLayout from './components/AdminLayout';
 import AdminPanel from './pages/AdminPanel';
 import NotFound from './pages/NotFound';
-import Test from "./pages/Test.tsx";
+import EditSubpage from "./pages/EditSubpage.tsx";
+import EditLayout from "./components/EditLayout.tsx";
 
 
 export default function App() {
@@ -22,13 +23,16 @@ export default function App() {
                 <Route path='/about' element={<About />} />
                 <Route path='/research' element={<Research />} />
                 <Route path='/studies' element={<Studies />} />
-                <Route path='/test' element={<Test />}/>
             </Route>
             
             <Route path='/login' element={<Login />} />
 
             <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminPanel />} />
+            </Route>
+
+            <Route path="/subpage/edit/" element={<EditLayout/>}>
+                <Route path="/subpage/edit/:id" element={<EditSubpage />}/>
             </Route>
             
             <Route path='*' element={<NotFound />} />
