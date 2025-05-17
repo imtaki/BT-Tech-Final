@@ -9,3 +9,9 @@ export type subpageData = {
     title: string,
     content: string,
 }
+
+export type adminUser = {
+    id: number,
+    email: string,
+    username: string
+}
