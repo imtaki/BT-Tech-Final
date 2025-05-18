@@ -16,17 +16,22 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-        'email' => 'required|email|unique:users,email',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
         ]);
 
         $admin = User::create([
-        'email' => $request->email,
-        'name' =>  'Admin ' . rand(1000, 9999),
-        'role' => 'admin',              
-        'password' => bcrypt('test'),
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => 'admin',
+            'password' => bcrypt($request->password),
         ]);
 
-        return response()->json(['message' => 'Admin created', 'data' => $admin]);
+        return response()->json([
+            'message' => 'Admin created',
+            'data' => $admin
+        ]);
     }
 
     public function destroy(User $admin)

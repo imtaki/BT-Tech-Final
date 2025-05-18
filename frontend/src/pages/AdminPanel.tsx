@@ -5,6 +5,7 @@ import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
 import {conferenceYear, subpageData, adminUser, editorUser} from "../types.ts";
+import AdminAddModal from '../components/AdminAddModal.tsx';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -132,17 +133,6 @@ export default function AdminPanel() {
       console.log(e)
     }
   }
-
-    const handleAddAdmin = async () => {
-      try {
-        const res = await api.post("/admins", { email: newAdmin });
-        setAdmins(prev => [...prev, res.data]);
-        setNewAdmin("");
-      } catch (e: unknown) {
-        console.error("Failed to add admin", e);
-      }
-    }
-
     const handleDeleteAdmin = async (adminId: number) => {
       try {
         await api.delete(`/admins/${adminId}`);
@@ -171,6 +161,10 @@ export default function AdminPanel() {
         console.log(e);
       }
     }
+
+    const handleAdminAdded = (newAdmin: adminUser) => {
+      setAdmins(prev => [...prev, newAdmin]);
+    };
 
   if(!authorized) {
     return null
@@ -317,16 +311,7 @@ export default function AdminPanel() {
           <h2 className="text-xl font-semibold mb-4">Administrátori</h2>
           
           <div className="flex flex-col gap-2 lg:flex-row mb-4">
-            <input
-              type="email"
-              value={newAdmin}
-              onChange={(e) => setNewAdmin(e.target.value)}
-              placeholder="E-mail administrátora"
-              className="flex-grow border px-3 py-2 rounded-l"
-            />
-            <button  onClick={handleAddAdmin} className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
-              <FaPlus className="mr-1" /> Pridať
-            </button>
+            <AdminAddModal onAdminAdded={handleAdminAdded} />
           </div>
           
           <ul className="divide-y divide-gray-200">
