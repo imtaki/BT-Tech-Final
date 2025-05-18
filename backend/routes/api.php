@@ -15,6 +15,7 @@ Route::get('/subpages/by-id/{id}', [SubPageController::class, "show"]);
 Route::get('/subpages/by-id/{id}/edit', [SubPageController::class, "checkEditorPermission"]);
 Route::get('/subpages/by-year/{year}', [SubPageController::class, "byYear"]);
 Route::get('/subpages/editor', [SubPageController::class, "getEditorSubpages"]);
+Route::get('/editor-year', [EditorController::class, "getYear"]);
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
