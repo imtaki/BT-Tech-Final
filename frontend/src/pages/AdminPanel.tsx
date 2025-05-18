@@ -156,7 +156,6 @@ export default function AdminPanel() {
   const handleAssignEditorYear = async (editorId: number, yearId: string) => {
     try {
       await api.put(`/editors/${editorId}/assign-year`, { conferenceYearId: yearId });
-      // Optionally refresh editors to get updated data
       const res = await api.get("/editors");
       setEditors(res.data);
     } catch (e: unknown) {
@@ -270,29 +269,42 @@ export default function AdminPanel() {
               conferenceYears={conferenceYears} 
             />
           </div>
-          
           <ul className="divide-y divide-gray-200">
-            {editors.map((editor) => (
-              <li key={editor.id} className="py-3 flex flex-col lg:flex-row items-start gap-2 lg:gap-16">
-                <span className="font-medium">{editor.email}</span>
-                <span className="font-medium">{editor.name}</span>
-                <div className="flex flex-col lg:flex-row gap-2 space-x-2">
-                  <select 
-                    className="border px-3 py-1 rounded"
-                    onChange={(e) => handleAssignEditorYear(editor.id, e.target.value)}
-                    defaultValue=""
-                  >
-                    <option value="">Prideliť k ročníku</option>
-                    {conferenceYears.map((yearObj: conferenceYear) => (
-                      <option key={yearObj.id} value={yearObj.id}>{yearObj.year}</option>
-                    ))}
-                  </select>
-                  <button onClick={() => handleDeleteEditor(editor.id)} className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
-                    <FaMinus className="mr-1" /> Odstrániť
-                  </button>
-                </div>
-              </li>
-            ))}
+            {(editors).map((editor: any) => {
+              const assignedYearId = editor.conference_years.length > 0 ? editor.conference_years[0].id.toString() : "";
+
+              return (
+                <li key={editor.id} className="py-3 flex flex-col lg:flex-row items-start gap-2 lg:gap-16">
+                  <span className="font-medium">{editor.email}</span>
+                  <span className="font-medium">{editor.name}</span>
+                  <span className="font-medium">
+                    {editor.conference_years.length > 0
+                      ? editor.conference_years[0].year
+                      : "Nie je priradený ročník"}
+                  </span>
+                  <div className="flex flex-col lg:flex-row gap-2 space-x-2">
+                    <select
+                      className="border px-3 py-1 rounded"
+                      onChange={(e) => handleAssignEditorYear(editor.id, e.target.value)}
+                      value={assignedYearId}
+                    >
+                      <option value="">Prideliť k ročníku</option>
+                      {(conferenceYears).map((yearObj: any) => (
+                        <option key={yearObj.id} value={yearObj.id}>
+                          {yearObj.year}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => handleDeleteEditor(editor.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded flex items-center"
+                    >
+                      <FaMinus className="mr-1" /> Odstrániť
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

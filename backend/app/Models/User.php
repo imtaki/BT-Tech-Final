@@ -48,4 +48,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    public function conferenceYears()
+    {
+        return $this->belongsToMany(ConferenceYear::class, 'user_conference_year');
+    }
 }

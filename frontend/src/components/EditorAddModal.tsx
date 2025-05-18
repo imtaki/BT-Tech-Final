@@ -25,7 +25,7 @@ export default function EditorAddModal({ onEditorAdded, conferenceYears }: Edito
         email, 
         name,
         password,
-        conferenceYearId: selectedYear 
+        conference_year_id: selectedYear 
       });
       onEditorAdded(res.data);
       setIsModalOpen(false);

@@ -19,5 +19,6 @@ export type adminUser = {
 export type editorUser = {
     id: number,
     email: string,
-    name: string
+    name: string,
+    conferenceYears: conferenceYear[];
 }

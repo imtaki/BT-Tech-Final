@@ -10,4 +10,9 @@ class ConferenceYear extends Model
     protected $casts = [
         'year' => 'integer',
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_conference_year');
+    }
 }
