@@ -2,10 +2,11 @@ import { Link } from "react-router";
 import { BiSolidRightArrow, BiSolidLeftArrow } from "react-icons/bi";
 import {useState, useEffect} from "react";
 import api from "../utils/axios";
+import {conferenceYear} from "../types.ts";
 
 export default function Sidebar() {
     const [sidebarActive, setSidebarActive] = useState(false);
-    const [conferenceYears, setConferenceYears] = useState([]);
+    const [conferenceYears, setConferenceYears] = useState<conferenceYear[]>([]);
     const [errorMessage, setMessage] = useState("");
 
 

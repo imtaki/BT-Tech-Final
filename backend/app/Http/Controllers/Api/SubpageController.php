@@ -22,28 +22,42 @@ class SubpageController extends Controller
 
         $validate = $request->validate([
             'title' => 'required|string',
-            'year' => 'required|integer',
+            'year' => 'required|integer'
         ]);
 
-        $item = Subpages::create($validate);
+        $user = auth('api')->user();
 
-        return response()->json(['message' => 'Subpage created', 'data' => $item]);
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
 
+        $subpage = Subpages::create([
+           'title' => $validate['title'],
+           'year' => $validate['year'],
+           'last_editor' => $user->id,
+        ]);
+
+        return response()->json(['message' => 'Subpage created', 'data' => $subpage]);
     }
 
     public function update(Request $request, $id) {
         $validated = $request->validate([
             'title' => 'required|string',
-            'content' => 'nullable|string',
+            'content' => 'nullable|string'
         ]);
 
-        if (!$request->has('content')) {
-            $validated['content'] = '';
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
         $subpage = Subpages::findorFail($id);
 
-        $subpage->update($validated);
+        $subpage->title = $validated['title'];
+        $subpage->content = $validated['content'];
+        $subpage->last_editor = $user->id;
+        $subpage->save();
 
         return response()->json(['message' => 'Subpage updated', 'data' => $subpage]);
     }
@@ -51,6 +65,11 @@ class SubpageController extends Controller
     public function destroy(Subpages $subpage) {
         $subpage->delete();
         return response()->json(['message' => 'Subpage deleted', 'data' => $subpage]);
+    }
+
+    public function byYear($year) {
+        $pages = Subpages::where('year', $year)->get();
+        return response()->json($pages);
     }
     //
 }

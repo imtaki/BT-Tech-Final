@@ -11,17 +11,15 @@ use App\Http\Controllers\Api\ConferenceYearController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+Route::get('/subpages/by-id/{id}', [SubPageController::class, "show"]);
+Route::get('/subpages/by-year/{year}', [SubPageController::class, "byYear"]);
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-Route::middleware(['auth:api', 'role.check'])->group(function () {
-    Route::get('/admin', fn(Request $request) =>
-        response()->json(["message" => "Accessed admin panel."]));
-    Route::get('/editor', fn(Request $request) =>
-        response()->json(["message" => "Accessed editor panel."]));
+Route::middleware(['auth:api', 'role.check'])->get('/role-check', function (Request $request) {
+    return response()->json(["success" => "Accessed admin/editor panel."]);
 });
-
 Route::apiResource('conference-years', ConferenceYearController::class);
 Route::apiResource('/subpages', SubPageController::class);
 Route::apiResource('/admins', AdminController::class);
-Route::apiResource('/editors', EditorController::class); 
+Route::apiResource('/editors', EditorController::class);
