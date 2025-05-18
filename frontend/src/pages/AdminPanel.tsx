@@ -6,6 +6,7 @@ import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
 import {conferenceYear, subpageData, adminUser, editorUser} from "../types.ts";
 import AdminAddModal from '../components/AdminAddModal.tsx';
+import EditorAddModal from '../components/EditorAddModal.tsx';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -18,8 +19,6 @@ export default function AdminPanel() {
   const [admins, setAdmins] = useState<adminUser[]>([]);
   const [newAdmin, setNewAdmin] = useState("");
   const [editors, setEditors] = useState<editorUser[]>([]);
-  const [newEditor, setNewEditor] = useState("");
-  const [newEditorName, setNewEditorName] = useState("");
   const navigate = useNavigate();
 
   const user = getUser();
@@ -135,38 +134,43 @@ export default function AdminPanel() {
       console.log(e)
     }
   }
-    const handleDeleteAdmin = async (adminId: number) => {
-      try {
-        await api.delete(`/admins/${adminId}`);
-        setAdmins(prev => prev.filter(admin => admin.id !== adminId));
-      } catch (e: unknown) {
-        console.log(e);
-      }
+  
+  const handleDeleteAdmin = async (adminId: number) => {
+    try {
+      await api.delete(`/admins/${adminId}`);
+      setAdmins(prev => prev.filter(admin => admin.id !== adminId));
+    } catch (e: unknown) {
+      console.log(e);
     }
+  }
 
-    const handleAddEditor = async () => {
-      try {
-        const res = await api.post("/editors", { email: newEditor, name: newEditorName});
-        setEditors(prev => [...prev, res.data]);
-        setNewEditor("");
-        setNewEditorName("");
-      } catch (e: unknown) {
-        console.error("Failed to add editor", e);
-      }
+  const handleDeleteEditor = async (editorId: number) => {
+    try {
+      await api.delete(`/editors/${editorId}`);
+      setEditors(prev => prev.filter(editor => editor.id !== editorId));
+    } catch (e: unknown) {
+      console.log(e);
     }
+  }
 
-    const handleDeleteEditor = async (editorId: number) => {
-      try {
-        await api.delete(`/editors/${editorId}`);
-        setEditors(prev => prev.filter(editor => editor.id !== editorId));
-      } catch (e: unknown) {
-        console.log(e);
-      }
+  const handleAssignEditorYear = async (editorId: number, yearId: string) => {
+    try {
+      await api.put(`/editors/${editorId}/assign-year`, { conferenceYearId: yearId });
+      // Optionally refresh editors to get updated data
+      const res = await api.get("/editors");
+      setEditors(res.data);
+    } catch (e: unknown) {
+      console.error("Failed to assign year to editor", e);
     }
+  }
 
-    const handleAdminAdded = (newAdmin: adminUser) => {
-      setAdmins(prev => [...prev, newAdmin]);
-    };
+  const handleAdminAdded = (newAdmin: adminUser) => {
+    setAdmins(prev => [...prev, newAdmin]);
+  };
+
+  const handleEditorAdded = (newEditor: editorUser) => {
+    setEditors(prev => [...prev, newEditor]);
+  };
 
   if(!authorized) {
     return null
@@ -260,42 +264,27 @@ export default function AdminPanel() {
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Editori</h2>
           
-          <div className="space-y-2 mb-4">
-            <input
-              type="text"
-              value={newEditorName}
-              onChange={(e) => setNewEditorName(e.target.value)}
-              placeholder="Meno editora"
-              className="w-full border px-3 py-2 rounded"
+          <div className="mb-4">
+            <EditorAddModal 
+              onEditorAdded={handleEditorAdded} 
+              conferenceYears={conferenceYears} 
             />
-            <input
-              type="email"
-              value={newEditor}
-              onChange={(e) => setNewEditor(e.target.value)}
-              placeholder="E-mail editora"
-              className="w-full border px-3 py-2 rounded"
-            />
-            <div className="flex flex-col gap-2 lg:flex-row">
-              <select className="flex-grow border px-3 py-2 rounded-l">
-                {conferenceYears.map((yearObj: conferenceYear) => (
-                  <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
-                ))}
-              </select>
-              <button onClick={handleAddEditor} className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
-                <FaPlus className="mr-1" /> Pridať editora
-              </button>
-            </div>
           </div>
+          
           <ul className="divide-y divide-gray-200">
             {editors.map((editor) => (
               <li key={editor.id} className="py-3 flex flex-col lg:flex-row items-start gap-2 lg:gap-16">
                 <span className="font-medium">{editor.email}</span>
                 <span className="font-medium">{editor.name}</span>
                 <div className="flex flex-col lg:flex-row gap-2 space-x-2">
-                  <select className="border px-3 py-1 rounded">
+                  <select 
+                    className="border px-3 py-1 rounded"
+                    onChange={(e) => handleAssignEditorYear(editor.id, e.target.value)}
+                    defaultValue=""
+                  >
                     <option value="">Prideliť k ročníku</option>
                     {conferenceYears.map((yearObj: conferenceYear) => (
-                      <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
+                      <option key={yearObj.id} value={yearObj.id}>{yearObj.year}</option>
                     ))}
                   </select>
                   <button onClick={() => handleDeleteEditor(editor.id)} className="bg-red-500 text-white px-3 py-1 rounded flex items-center">

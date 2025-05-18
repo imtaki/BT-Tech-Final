@@ -18,13 +18,14 @@ class EditorController extends Controller
         $request->validate([
         'email' => 'required|email|unique:users,email',
         'name' => 'required|string|max:255',
+        'password' => 'required|string|min:6',
         ]);
 
         $editor = User::create([
         'email' => $request->email,
         'name' => $request->name,
         'role' => 'editor',             
-        'password' => bcrypt('test'),
+        'password' => bcrypt($request->password),
         ]);
 
         return response()->json(['message' => 'Editor created', 'data' => $editor]);
