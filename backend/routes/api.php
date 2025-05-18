@@ -12,7 +12,9 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 Route::get('/subpages/by-id/{id}', [SubPageController::class, "show"]);
+Route::get('/subpages/by-id/{id}/edit', [SubPageController::class, "checkEditorPermission"]);
 Route::get('/subpages/by-year/{year}', [SubPageController::class, "byYear"]);
+Route::get('/subpages/editor', [SubPageController::class, "getEditorSubpages"]);
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');

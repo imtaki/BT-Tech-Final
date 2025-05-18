@@ -18,11 +18,13 @@ export default function EditSubpage() {
             try {
                 const res = await api.get("/role-check");
                 setAuthorized(true);
-                // TODO Check if editor has access to the subpage
+                if (res.data.message === "editor") {
+                    await api.get(`/subpages/by-id/${id}/edit`);
+                }
             } catch (e: unknown) {
                 if (e instanceof AxiosError) {
                     setAuthorized(false);
-                    setErrorMessage(e.response?.statusText);
+                    setErrorMessage(e.response?.data.message);
                 }
             }
         }
