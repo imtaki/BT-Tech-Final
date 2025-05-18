@@ -37,11 +37,11 @@ const SubpageView = () => {
     }
 
     return (
-        <>
-            <p className="text-4xl">{subpage.title}</p>
+        <div className="prose-lg lg:px-48">
+            <h1 className="text-center">{subpage.title}</h1>
             <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(subpage.content)}}
-                 className="headings-reset"></div>
-        </>
+                 className="mt-4"></div>
+        </div>
     );
 }
 
