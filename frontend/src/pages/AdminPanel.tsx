@@ -288,7 +288,7 @@ export default function AdminPanel() {
                       value={assignedYearId}
                     >
                       <option value="">Prideliť k ročníku</option>
-                      {(conferenceYears).map((yearObj: any) => (
+                      {(conferenceYears).map((yearObj: conferenceYear) => (
                         <option key={yearObj.id} value={yearObj.id}>
                           {yearObj.year}
                         </option>
