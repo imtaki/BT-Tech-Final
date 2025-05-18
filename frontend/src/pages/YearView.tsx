@@ -35,10 +35,10 @@ const YearView = () => {
 
     return (
       <div>
-          <h2 className="text-2xl font-bold">Conference year {year}:</h2>
+          <h2 className="text-3xl font-bold">Conference year {year}:</h2>
           {subpages.map((subpage) =>
               <Link to={`/${year}/${subpage.id}`} key={subpage.id}>
-                  <p className="mt-4">{subpage.title}</p>
+                  <p className="text-xl mt-4 text-gray-800">{subpage.title}</p>
               </Link>
           )}
       </div>

@@ -17,7 +17,6 @@ export default function AdminPanel() {
   const [subpageTitle, setSubpageTitle] = useState("");
   const [subpageYear, setSubpageYear] = useState(new Date().getFullYear().toString()); // OP Pro fix - lebo sa mi to nechcelo inak logovat, funguje aj na buduce roky!
   const [admins, setAdmins] = useState<adminUser[]>([]);
-  const [newAdmin, setNewAdmin] = useState("");
   const [editors, setEditors] = useState<editorUser[]>([]);
   const navigate = useNavigate();
 

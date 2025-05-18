@@ -30,7 +30,7 @@ export default function WysiwygEditor(props : {id: number, title: string, conten
                 />
             </div>
             <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(htmlString)}}
-                 className="headings-reset mt-4 mb-4"/>
+                 className="prose-lg mt-4 mb-4 lg:px-64"/>
             <div className="flex justify-center">
                 <div className="w-12/12 lg:w-6/12">
                     <Editor
@@ -46,7 +46,7 @@ export default function WysiwygEditor(props : {id: number, title: string, conten
                                 'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
                             ],
                             toolbar: 'undo redo | blocks | ' +
-                                'bold italic forecolor | alignleft aligncenter ' +
+                                'bold italic forecolor fontsize | alignleft aligncenter ' +
                                 'alignright alignjustify | bullist numlist outdent indent | ' +
                                 'removeformat | help | table tabledelete | tableprops tablerowprops tablecellprops | ' +
                                 'tableinsertrowbefore tableinsertrowafter tabledeleterow | ' +
