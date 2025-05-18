@@ -150,7 +150,7 @@ export default function EditorPanel() {
               placeholder="Rok konferencie (napr. 2026)"
               className="flex-grow border px-3 py-2 rounded-l"
             />
-            <button onClick={handleAddYear} className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
+            <button onClick={handleAddYear} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r flex items-center">
               <FaPlus className="mr-1" /> Pridať
             </button>
           </div>
@@ -159,7 +159,7 @@ export default function EditorPanel() {
             {conferenceYears.map((yearObj: conferenceYear) => (
               <li key={yearObj.id} className="py-3 flex items-center justify-between">
                 <span className="font-medium">{yearObj.year}</span>
-                <button onClick={() => handleDeleteYear(yearObj.id)} className="bg-red-500 text-white px-3 py-1 rounded flex items-center">
+                <button onClick={() => handleDeleteYear(yearObj.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center">
                   <FaMinus className="mr-1" /> Odstrániť
                 </button>
               </li>
@@ -185,7 +185,7 @@ export default function EditorPanel() {
                   <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
                 ))}
               </select>
-              <button onClick={handleAddSubpage} className="bg-blue-500 text-white px-4 py-2 rounded-r flex items-center">
+              <button onClick={handleAddSubpage} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r flex items-center">
                 <FaPlus className="mr-1" /> Pridať podstránku
               </button>
             </div>
@@ -220,12 +220,12 @@ export default function EditorPanel() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
                         <Link to={{pathname: "/subpage/edit/" + subpage.id}}>
-                          <button className="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
+                          <button className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center">
                             <FaEdit className="mr-1"/> Editovať
                           </button>
                         </Link>
                         <button onClick={() => handleDeleteSubpage(subpage.id)}
-                                className="bg-red-500 text-white px-2 py-1 rounded flex items-center">
+                                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded flex items-center">
                           <FaMinus className="mr-1"/> Odstrániť
                         </button>
                       </div>

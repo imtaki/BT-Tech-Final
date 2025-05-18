@@ -18,7 +18,7 @@ class EditorController extends Controller
     {
         $request->validate([
         'email' => 'required|email|unique:users,email',
-        'name' => 'required|string|max:255',
+        'name' => 'required|string|max:255|min:2',
         'password' => 'required|string|min:6',
         'conference_year_id' => 'required|exists:conference_years,id',
         ]);
