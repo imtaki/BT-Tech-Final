@@ -155,13 +155,13 @@ export default function AdminPanel() {
 
   const handleAssignEditorYear = async (editorId: number, yearId: string) => {
     try {
-      await api.put(`/editors/${editorId}/assign-year`, { conferenceYearId: yearId });
+      await api.put(`/editors/${editorId}`, { conferenceYearId: yearId });
       const res = await api.get("/editors");
       setEditors(res.data);
     } catch (e: unknown) {
       console.error("Failed to assign year to editor", e);
     }
-  }
+  };
 
   const handleAdminAdded = (newAdmin: adminUser) => {
     setAdmins(prev => [...prev, newAdmin]);

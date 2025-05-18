@@ -35,6 +35,17 @@ class EditorController extends Controller
         return response()->json(['message' => 'Editor created', 'data' => $editor]);
     }
 
+    public function update(Request $request, User $editor)
+    {
+        $request->validate([
+            'conferenceYearId' => 'required|exists:conference_years,id',
+        ]);
+
+        $editor->conferenceYears()->sync([$request->conferenceYearId]);
+
+        return response()->json(['message' => 'Editor updated', 'data' => $editor->load('conferenceYears')]);
+    }
+
     public function destroy(User $editor)
     {
         $editor->delete();
