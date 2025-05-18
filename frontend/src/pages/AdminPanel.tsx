@@ -27,7 +27,10 @@ export default function AdminPanel() {
   useEffect(() => {
     const checkAuthorization = async () => {
       try {
-        await api.get("/admin");
+        const res = await api.get("/role-check");
+        if (res.data.message == "editor") {
+          navigate("/editor");
+        }
         setAuthorized(true);
       } catch(e: unknown) {
         setAuthorized(false);
@@ -87,7 +90,6 @@ export default function AdminPanel() {
       try {
         const res = await api.get("/editors");
         setEditors(res.data);
-        console.log(res.data)
       } catch (e: unknown) {
         if (e instanceof AxiosError){
           console.log(e.response?.statusText);

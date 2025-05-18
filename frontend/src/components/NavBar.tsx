@@ -82,6 +82,18 @@ export default function NavBar() {
                         </li>
                     )}
 
+                    {role == "editor" && (
+                        <li className="hover:text-orange-400 hover:underline underline-offset-2">
+                            <Link className={currentPath === '/editor'
+                                ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
+                                : "hover:text-orange-400 hover:underline underline-offset-2"
+                            }
+
+                                  to="/editor"> Editor
+                            </Link>
+                        </li>
+                    )}
+
                     {loggedIn && (
                         <li className=" hover:text-orange-400 hover:underline underline-offset-4">
                             <button className="flex flex-row gap-1 text-xl font-bold" onClick={handleLogout}>
@@ -122,6 +134,18 @@ export default function NavBar() {
                         }
 
                               to="/admin"> Admin
+                        </Link>
+                    </li>
+                )}
+
+                {role == "editor" && (
+                    <li className="hover:text-orange-400 hover:underline underline-offset-2 p-2">
+                        <Link className={currentPath === '/editor'
+                            ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
+                            : "hover:text-orange-400 hover:underline underline-offset-2"
+                        }
+
+                              to="/editor"> Editor
                         </Link>
                     </li>
                 )}

@@ -12,6 +12,8 @@ import NotFound from './pages/NotFound';
 import EditSubpage from "./pages/EditSubpage.tsx";
 import EditLayout from "./components/EditLayout.tsx";
 import EditorPanel from "./pages/EditorPanel.tsx";
+import SubpageView from "./pages/SubpageView.tsx";
+import YearView from "./pages/YearView.tsx";
 
 
 export default function App() {
@@ -24,6 +26,8 @@ export default function App() {
                 <Route path='/about' element={<About />} />
                 <Route path='/research' element={<Research />} />
                 <Route path='/studies' element={<Studies />} />
+                <Route path='/:year/:id' element={<SubpageView />} />
+                <Route path='/:year' element={<YearView/>}/>
             </Route>
             
             <Route path='/login' element={<Login />} />
@@ -40,7 +44,7 @@ export default function App() {
                 <Route path="/subpage/edit/:id" element={<EditSubpage />}/>
             </Route>
             
-            <Route path='*' element={<NotFound />} />
+            <Route path='/not-found' element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </>

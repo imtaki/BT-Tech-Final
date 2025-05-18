@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('subpages', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('content')->nullable();
             $table->integer('year');
-            $table->integer('last_update_by')->nullable();
+            $table->string('title');
+            $table->text('content')->nullable();
+            $table->unsignedBigInteger('last_editor')->references('id')->on('users');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pages');
+        Schema::dropIfExists('subpages');
     }
 };

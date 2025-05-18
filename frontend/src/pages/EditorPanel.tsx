@@ -21,11 +21,11 @@ export default function EditorPanel() {
   useEffect(() => {
     const checkAuthorization = async () => {
       try {
-        await api.get("/editor");
+        const res = await api.get("/role-check");
         setAuthorized(true);
-        if (user && user.role === ("admin")) {
-        navigate("/admin");
-      }
+        if (res.data.message == "admin") {
+          navigate("/admin");
+        }
       } catch(e: unknown) {
         setAuthorized(false);
         if (e instanceof AxiosError){

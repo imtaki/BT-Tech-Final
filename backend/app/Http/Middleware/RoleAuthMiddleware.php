@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminAuthMiddleware
+class RoleAuthMiddleware
 {
     /**
      * Handle an incoming request.
@@ -17,10 +17,12 @@ class AdminAuthMiddleware
     {
         $user = auth('api')->user();
 
-        if ($user->role != 'admin') {
+        if ($user->role == 'admin') {
+            return response()->json(['message' => 'admin'], Response::HTTP_OK);
+        } else if($user->role == 'editor') {
+            return response()->json(['message' => 'editor'], Response::HTTP_OK);
+        } else {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
-        return $next($request);
     }
 }
