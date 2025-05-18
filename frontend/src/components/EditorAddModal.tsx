@@ -18,8 +18,10 @@ export default function EditorAddModal({ onEditorAdded, conferenceYears }: Edito
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleAddEditor = async () => {
+    setErrors({});
     try {
       const res = await api.post("/editors", { 
         email, 
@@ -29,13 +31,17 @@ export default function EditorAddModal({ onEditorAdded, conferenceYears }: Edito
       });
       onEditorAdded(res.data);
       setIsModalOpen(false);
-      
+
       setName('');
       setEmail('');
       setPassword('');
       setSelectedYear('');
-    } catch (e: unknown) {
-      console.error("Failed to add editor", e);
+    } catch (e: any) {
+      if (e.response && e.response.status === 422) {
+        setErrors(e.response.data.errors);
+      } else {
+        console.error("Failed to add editor", e);
+      }
     }
   };
 
@@ -53,32 +59,39 @@ export default function EditorAddModal({ onEditorAdded, conferenceYears }: Edito
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Meno editora"
-              className="w-full border px-3 py-2 mb-3 rounded"
+              className="w-full border px-3 py-2 mb-1 rounded"
             />
+            {errors.name && <p className="text-red-500 text-sm mb-2">{errors.name}</p>}
+
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="E-mail editora"
-              className="w-full border px-3 py-2 mb-3 rounded"
+              className="w-full border px-3 py-2 mb-1 rounded"
             />
-             <input
+            {errors.email && <p className="text-red-500 text-sm mb-2">{errors.email}</p>}
+
+            <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Heslo"
-              className="w-full border px-3 py-2 mb-3 rounded"
+              className="w-full border px-3 py-2 mb-1 rounded"
             />
+            {errors.password && <p className="text-red-500 text-sm mb-2">{errors.password}</p>}
+
             <select 
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="w-full border px-3 py-2 mb-4 rounded"
+              className="w-full border px-3 py-2 mb-1 rounded"
             >
               <option value="">Vybrať ročník</option>
               {conferenceYears.map((yearObj: conferenceYear) => (
                 <option key={yearObj.id} value={yearObj.id}>{yearObj.year}</option>
               ))}
             </select>
+            {errors.conference_year_id && <p className="text-red-500 text-sm mb-2">{errors.conference_year_id}</p>}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsModalOpen(false)}
