@@ -54,8 +54,8 @@ export default function EditorPanel() {
   useEffect(() => {
     const fetchSubpages = async () => {
       try {
-        const res = await api.get("/subpages");
-        setSubpages(res.data)
+        const res = await api.get("/subpages/editor");
+        setSubpages(res.data);
       } catch (e: unknown) {
         if (e instanceof AxiosError){
           console.log(e.response?.statusText);
