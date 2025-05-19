@@ -227,22 +227,48 @@ export default function AdminPanel() {
     }
   };
 
-  const handleAdminAdded = (newAdmin: adminUser) => {
-    setAdmins(prev => [...prev, newAdmin]);
-    setNotification({
-        success: true,
-        message: "Succesfully added new Admin!",
-        show: true,
-      });
+  const handleAdminAdded = () => {
+    const fetchAdmins = async () => {
+      try {
+        const res = await api.get("/admins");
+        setAdmins(res.data);
+        setNotification({
+          success: true,
+          message: "Admin successfully added!",
+          show: true,
+        });
+      } catch (e) {
+        console.error("Failed to fetch admins", e);
+        setNotification({
+          success: false,
+          message: "Failed to refresh admin list.",
+          show: true,
+        });
+      }
+    };
+    fetchAdmins();
   };
 
-  const handleEditorAdded = (newEditor: editorUser) => {
-    setEditors(prev => [...prev, newEditor]);
-    setNotification({
-        success: true,
-        message: "Succesfully added new Editor!",
-        show: true,
-      });
+  const handleEditorAdded = () => {
+    const fetchEditors = async () => {
+      try {
+        const res = await api.get("/editors");
+        setAdmins(res.data);
+        setNotification({
+          success: true,
+          message: "Editor successfully added!",
+          show: true,
+        });
+      } catch (e) {
+        console.error("Failed to fetch editors", e);
+        setNotification({
+          success: false,
+          message: "Failed to refresh editors list.",
+          show: true,
+        });
+      }
+    };
+    fetchEditors();
   };
 
   if(!authorized) {
