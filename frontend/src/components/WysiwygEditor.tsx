@@ -3,24 +3,42 @@ import { Editor } from '@tinymce/tinymce-react';
 import DOMPurify from 'dompurify'
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
+import Notification from './Notification.tsx';
 
 export default function WysiwygEditor(props : {id: number, title: string, content: string}) {
     const [htmlString, setHtmlString] = useState("");
     const [title, setTitle] = useState(props.title);
+    const [notification, setNotification] = useState({ success: false, message: "", show: false });
     const editorRef = useRef<any>(null);
 
     const handleSave = async () => {
         try {
             await api.patch(`/subpages/${props.id}`, {title, content: DOMPurify.sanitize(editorRef.current.getContent())});
+            setNotification({
+              success: true,
+              message: "Content saved successfully!",
+              show: true,
+            });
         } catch (e: unknown) {
             if (e instanceof AxiosError) {
-                console.log(e.response?.statusText);
+                setNotification({
+                        show: true,
+                        success: false,
+                        message: e.response?.statusText || "An error occurred while saving content."
+                      });
             }
         }
     }
 
     return (
         <>
+            {notification.show && (
+              <Notification
+                success={notification.success}
+                message={notification.message}
+                onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
+              />
+            )}
             <div className="flex justify-center">
                 <input
                     type="text"

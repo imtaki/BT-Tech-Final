@@ -7,6 +7,7 @@ import {AxiosError} from "axios";
 import {conferenceYear, subpageData, adminUser, editorUser} from "../types.ts";
 import AdminAddModal from '../components/AdminAddModal.tsx';
 import EditorAddModal from '../components/EditorAddModal.tsx';
+import Notification from '../components/Notification.tsx';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -18,6 +19,7 @@ export default function AdminPanel() {
   const [subpageYear, setSubpageYear] = useState(new Date().getFullYear().toString()); // OP Pro fix - lebo sa mi to nechcelo inak logovat, funguje aj na buduce roky!
   const [admins, setAdmins] = useState<adminUser[]>([]);
   const [editors, setEditors] = useState<editorUser[]>([]);
+  const [notification, setNotification] = useState({ success: false, message: "", show: false });
   const navigate = useNavigate();
 
   const user = getUser();
@@ -101,9 +103,18 @@ export default function AdminPanel() {
     try {
       const res = await api.post("/conference-years", { year: newYear })
       setConferenceYears(prev => [res.data, ...prev].sort((a: conferenceYear,b: conferenceYear) => b.year - a.year));
+      setNotification({
+        success: true,
+        message: "Year succesfully added!",
+        show: true,
+      });
       setNewYear("")
     } catch (e: unknown) {
-      console.log(e)
+      setNotification({
+        success: true,
+        message: "Something went wrong while adding new Year!",
+        show: true,
+      });
     }
   }
 
@@ -111,8 +122,17 @@ export default function AdminPanel() {
     try {
       await api.delete(`/conference-years/${id}`)
       setConferenceYears(prev => prev.filter((year: conferenceYear) => year.id !== id));
+      setNotification({
+        success: true,
+        message: "Year succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e)
+      setNotification({
+        success: true,
+        message: "Something went wrong while deleting Year!",
+        show: true,
+      });
     }
   }
 
@@ -120,8 +140,17 @@ export default function AdminPanel() {
     try {
       const res = await api.post("/subpages", {title: subpageTitle, year: Number(subpageYear)})
       setSubpages(prev => [res.data.data, ...prev].sort((a: subpageData, b: subpageData) => b.year - a.year))
+      setNotification({
+        success: true,
+        message: "Subpage succesfully added!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e);
+      setNotification({
+        success: true,
+        message: "Something went wrong while adding new Subpage!",
+        show: true,
+      });
     }
   }
 
@@ -129,8 +158,17 @@ export default function AdminPanel() {
     try {
       await api.delete(`/subpages/${subpage}`)
       setSubpages(prev => prev.filter((subpages: subpageData) => subpages.id != subpage))
+      setNotification({
+        success: true,
+        message: "Subpage succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e)
+      setNotification({
+        success: true,
+        message: "Something went wrong while deleting new Subpage!",
+        show: true,
+      });
     }
   }
   
@@ -138,8 +176,17 @@ export default function AdminPanel() {
     try {
       await api.delete(`/admins/${adminId}`);
       setAdmins(prev => prev.filter(admin => admin.id !== adminId));
+      setNotification({
+        success: true,
+        message: "Admin succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e);
+      setNotification({
+        success: true,
+        message: "Something went wrong while deleting Admin!",
+        show: true,
+      });
     }
   }
 
@@ -147,8 +194,17 @@ export default function AdminPanel() {
     try {
       await api.delete(`/editors/${editorId}`);
       setEditors(prev => prev.filter(editor => editor.id !== editorId));
+      setNotification({
+        success: true,
+        message: "Editor succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e);
+      setNotification({
+        success: true,
+        message: "Something went wrong while deleting Editor!",
+        show: true,
+      });
     }
   }
 
@@ -157,17 +213,36 @@ export default function AdminPanel() {
       await api.put(`/editors/${editorId}`, { conferenceYearId: yearId });
       const res = await api.get("/editors");
       setEditors(res.data);
+      setNotification({
+        success: true,
+        message: "Succesfully assigned year to Editor!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.error("Failed to assign year to editor", e);
+      setNotification({
+        success: true,
+        message: "Failed to assign year to editor!",
+        show: true,
+      });
     }
   };
 
   const handleAdminAdded = (newAdmin: adminUser) => {
     setAdmins(prev => [...prev, newAdmin]);
+    setNotification({
+        success: true,
+        message: "Succesfully added new Admin!",
+        show: true,
+      });
   };
 
   const handleEditorAdded = (newEditor: editorUser) => {
     setEditors(prev => [...prev, newEditor]);
+    setNotification({
+        success: true,
+        message: "Succesfully added new Editor!",
+        show: true,
+      });
   };
 
   if(!authorized) {
@@ -176,6 +251,13 @@ export default function AdminPanel() {
 
   return (
     <div className="p-6 bg-gray-100 mt-24 lg:mt-36">
+      {notification.show && (
+          <Notification
+              success={notification.success}
+              message={notification.message}
+              onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
+          />
+      )}
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <h3 className='text-xl'>Welcome  {user.name}</h3>
@@ -261,24 +343,26 @@ export default function AdminPanel() {
       {activeTab === 'editors' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Editori</h2>
-          
+
           <div className="mb-4">
             <EditorAddModal 
               onEditorAdded={handleEditorAdded} 
               conferenceYears={conferenceYears} 
             />
           </div>
+
           <ul className="divide-y divide-gray-200">
             {(editors).map((editor: any) => {
-              const assignedYearId = editor.conference_years.length > 0 ? editor.conference_years[0].id.toString() : "";
+              const years = editor.conference_years ?? [];
+              const assignedYearId = years.length > 0 ? years[0].id.toString() : "";
 
               return (
                 <li key={editor.id} className="py-3 flex flex-col lg:flex-row items-start gap-2 lg:gap-16">
                   <span className="font-medium">{editor.email}</span>
                   <span className="font-medium">{editor.name}</span>
                   <span className="font-medium">
-                    {editor.conference_years.length > 0
-                      ? editor.conference_years[0].year
+                    {years.length > 0
+                      ? years[0].year
                       : "Nie je priradený ročník"}
                   </span>
                   <div className="flex flex-col lg:flex-row gap-2 space-x-2">
