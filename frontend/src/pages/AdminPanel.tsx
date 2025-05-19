@@ -111,7 +111,7 @@ export default function AdminPanel() {
       setNewYear("")
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Something went wrong while adding new Year!",
         show: true,
       });
@@ -129,7 +129,7 @@ export default function AdminPanel() {
       });
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Something went wrong while deleting Year!",
         show: true,
       });
@@ -147,7 +147,7 @@ export default function AdminPanel() {
       });
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Something went wrong while adding new Subpage!",
         show: true,
       });
@@ -165,7 +165,7 @@ export default function AdminPanel() {
       });
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Something went wrong while deleting new Subpage!",
         show: true,
       });
@@ -183,7 +183,7 @@ export default function AdminPanel() {
       });
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Something went wrong while deleting Admin!",
         show: true,
       });
@@ -201,7 +201,7 @@ export default function AdminPanel() {
       });
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Something went wrong while deleting Editor!",
         show: true,
       });
@@ -220,7 +220,7 @@ export default function AdminPanel() {
       });
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Failed to assign year to editor!",
         show: true,
       });

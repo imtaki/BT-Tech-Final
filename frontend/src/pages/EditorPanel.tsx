@@ -76,7 +76,7 @@ export default function EditorPanel() {
       });
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Something went wrong while adding new Subpage!",
         show: true,
       });
@@ -94,7 +94,7 @@ export default function EditorPanel() {
       });
     } catch (e: unknown) {
       setNotification({
-        success: true,
+        success: false,
         message: "Something went wrong while deleting new Subpage!",
         show: true,
       });
