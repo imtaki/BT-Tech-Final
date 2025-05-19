@@ -103,7 +103,7 @@ export default function NavBar() {
                     )}
                 </ul>
             </nav>
-            <ul className={`lg:hidden absolute left-0 bg-white w-full z-30 px-6 ${dropdownActive ? "top-[95px] ease-in-out duration-300" : "top-[-200px] ease-in-out duration-300"}`}>
+            <ul className={`lg:hidden fixed left-0 bg-white w-full z-30 px-6 ${dropdownActive ? "top-[95px] ease-in-out duration-300" : "top-[-200px] ease-in-out duration-300"}`}>
                 {navItems.map((item) => (
                     <li key={item.id} className="p-2">
                         <Link

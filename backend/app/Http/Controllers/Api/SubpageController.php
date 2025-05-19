@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ConferenceYear;
 use App\Models\Subpages;
+use App\Models\UserConferenceYear;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class SubpageController extends Controller
 {
@@ -70,6 +74,50 @@ class SubpageController extends Controller
     public function byYear($year) {
         $pages = Subpages::where('year', $year)->get();
         return response()->json($pages);
+    }
+
+    public function getEditorSubpages() {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $yearid = UserConferenceYear::where('user_id', $user->id)->value('conference_year_id');
+
+        if (!$yearid) {
+            return response()->json(['message' => 'No year has been associated.'], 404);
+        }
+
+        $year = ConferenceYear::where('id', $yearid)->value('year');
+
+        $subpages = Subpages::where('year', $year)->get();
+
+        return response()->json($subpages);
+    }
+
+
+    public function checkEditorPermission($id)
+    {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $subpage = Subpages::findOrFail($id);
+
+        $yearId = UserConferenceYear::where('user_id', $user->id)->value('conference_year_id');
+        if (!$yearId) {
+            return response()->json(['message' => 'No year has been associated.'], 404);
+        }
+        $year = ConferenceYear::where('id', $yearId)->value('year');
+
+        if ($year != $subpage->year) {
+            return response()->json(['message' => 'You do not have permission to edit this page.'], 403);
+        }
+
+        return response()->json(['message' => "Allowed"]);
     }
     //
 }

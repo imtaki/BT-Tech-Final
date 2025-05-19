@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\api;
 
+use App\Models\ConferenceYear;
 use App\Models\User;
+use App\Models\UserConferenceYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -26,7 +28,7 @@ class EditorController extends Controller
         $editor = User::create([
         'email' => $request->email,
         'name' => $request->name,
-        'role' => 'editor',             
+        'role' => 'editor',
         'password' => bcrypt($request->password),
         ]);
 
@@ -50,5 +52,23 @@ class EditorController extends Controller
     {
         $editor->delete();
         return response()->json(['message' => 'Editor deleted', 'data' => $editor]);
+    }
+
+    public function getYear() {
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        if ($user->role == "admin") {
+            return response()->json(['message' => 'All']);
+        } else if($user->role == "editor") {
+            $yearId = UserConferenceYear::where("user_id", $user->id)->value("conference_year_id");
+            $year = ConferenceYear::find($yearId);
+            return response()->json($year);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
     }
 }
