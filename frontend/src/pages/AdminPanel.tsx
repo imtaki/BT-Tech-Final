@@ -253,7 +253,7 @@ export default function AdminPanel() {
     const fetchEditors = async () => {
       try {
         const res = await api.get("/editors");
-        setAdmins(res.data);
+        setEditors(res.data);
         setNotification({
           success: true,
           message: "Editor successfully added!",
