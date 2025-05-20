@@ -22,3 +22,9 @@ export type editorUser = {
     name: string,
     conferenceYears: conferenceYear[];
 }
+
+export type customFile = {
+    id: number,
+    name: string,
+    path: string
+}
