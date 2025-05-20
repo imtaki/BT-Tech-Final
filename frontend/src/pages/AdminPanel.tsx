@@ -7,6 +7,7 @@ import {AxiosError} from "axios";
 import {conferenceYear, subpageData, adminUser, editorUser, customFile} from "../types.ts";
 import AdminAddModal from '../components/AdminAddModal.tsx';
 import EditorAddModal from '../components/EditorAddModal.tsx';
+import Notification from '../components/Notification.tsx';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -18,6 +19,7 @@ export default function AdminPanel() {
   const [subpageYear, setSubpageYear] = useState(new Date().getFullYear().toString());
   const [admins, setAdmins] = useState<adminUser[]>([]);
   const [editors, setEditors] = useState<editorUser[]>([]);
+  const [notification, setNotification] = useState({ success: false, message: "", show: false });
   const [file, setFile] = useState<File | null>();
   const [files, setFiles] = useState<customFile[]>([]);
   const navigate = useNavigate();
@@ -115,9 +117,18 @@ export default function AdminPanel() {
     try {
       const res = await api.post("/conference-years", { year: newYear })
       setConferenceYears(prev => [res.data, ...prev].sort((a: conferenceYear,b: conferenceYear) => b.year - a.year));
+      setNotification({
+        success: true,
+        message: "Year succesfully added!",
+        show: true,
+      });
       setNewYear("")
     } catch (e: unknown) {
-      console.log(e)
+      setNotification({
+        success: false,
+        message: "Something went wrong while adding new Year!",
+        show: true,
+      });
     }
   }
 
@@ -125,8 +136,17 @@ export default function AdminPanel() {
     try {
       await api.delete(`/conference-years/${id}`)
       setConferenceYears(prev => prev.filter((year: conferenceYear) => year.id !== id));
+      setNotification({
+        success: true,
+        message: "Year succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e)
+      setNotification({
+        success: false,
+        message: "Something went wrong while deleting Year!",
+        show: true,
+      });
     }
   }
 
@@ -134,8 +154,17 @@ export default function AdminPanel() {
     try {
       const res = await api.post("/subpages", {title: subpageTitle, year: Number(subpageYear)})
       setSubpages(prev => [res.data.data, ...prev].sort((a: subpageData, b: subpageData) => b.year - a.year))
+      setNotification({
+        success: true,
+        message: "Subpage succesfully added!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e);
+      setNotification({
+        success: false,
+        message: "Something went wrong while adding new Subpage!",
+        show: true,
+      });
     }
   }
 
@@ -143,17 +172,35 @@ export default function AdminPanel() {
     try {
       await api.delete(`/subpages/${subpage}`)
       setSubpages(prev => prev.filter((subpages: subpageData) => subpages.id != subpage))
+      setNotification({
+        success: true,
+        message: "Subpage succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e)
+      setNotification({
+        success: false,
+        message: "Something went wrong while deleting new Subpage!",
+        show: true,
+      });
     }
   }
-  
+
   const handleDeleteAdmin = async (adminId: number) => {
     try {
       await api.delete(`/admins/${adminId}`);
       setAdmins(prev => prev.filter(admin => admin.id !== adminId));
+      setNotification({
+        success: true,
+        message: "Admin succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e);
+      setNotification({
+        success: false,
+        message: "Something went wrong while deleting Admin!",
+        show: true,
+      });
     }
   }
 
@@ -161,8 +208,17 @@ export default function AdminPanel() {
     try {
       await api.delete(`/editors/${editorId}`);
       setEditors(prev => prev.filter(editor => editor.id !== editorId));
+      setNotification({
+        success: true,
+        message: "Editor succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e);
+      setNotification({
+        success: false,
+        message: "Something went wrong while deleting Editor!",
+        show: true,
+      });
     }
   }
 
@@ -171,17 +227,62 @@ export default function AdminPanel() {
       await api.put(`/editors/${editorId}`, { conferenceYearId: yearId });
       const res = await api.get("/editors");
       setEditors(res.data);
+      setNotification({
+        success: true,
+        message: "Succesfully assigned year to Editor!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.error("Failed to assign year to editor", e);
+      setNotification({
+        success: false,
+        message: "Failed to assign year to editor!",
+        show: true,
+      });
     }
   };
 
-  const handleAdminAdded = (newAdmin: adminUser) => {
-    setAdmins(prev => [...prev, newAdmin]);
+  const handleAdminAdded = () => {
+    const fetchAdmins = async () => {
+      try {
+        const res = await api.get("/admins");
+        setAdmins(res.data);
+        setNotification({
+          success: true,
+          message: "Admin successfully added!",
+          show: true,
+        });
+      } catch (e) {
+        console.error("Failed to fetch admins", e);
+        setNotification({
+          success: false,
+          message: "Failed to refresh admin list.",
+          show: true,
+        });
+      }
+    };
+    fetchAdmins();
   };
 
-  const handleEditorAdded = (newEditor: editorUser) => {
-    setEditors(prev => [...prev, newEditor]);
+  const handleEditorAdded = () => {
+    const fetchEditors = async () => {
+      try {
+        const res = await api.get("/editors");
+        setEditors(res.data);
+        setNotification({
+          success: true,
+          message: "Editor successfully added!",
+          show: true,
+        });
+      } catch (e) {
+        console.error("Failed to fetch editors", e);
+        setNotification({
+          success: false,
+          message: "Failed to refresh editors list.",
+          show: true,
+        });
+      }
+    };
+    fetchEditors();
   };
 
   const addFile = async () => {
@@ -207,12 +308,19 @@ export default function AdminPanel() {
 
   return (
     <div className="p-6 bg-gray-100 mt-24 lg:mt-36">
+      {notification.show && (
+          <Notification
+              success={notification.success}
+              message={notification.message}
+              onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
+          />
+      )}
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <h3 className='text-xl'>Welcome  {user.name}</h3>
           <nav className="-mb-px mt-4 grid grid-cols-2 lg:flex gap-x-10 space-x-8">
             <Link
-              to="" 
+              to=""
               onClick={() => setActiveTab('years')}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'years' 
@@ -222,8 +330,8 @@ export default function AdminPanel() {
             >
               Ročníky konferencie
             </Link>
-            <Link 
-              to="" 
+            <Link
+              to=""
               onClick={() => setActiveTab('editors')}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'editors' 
@@ -233,8 +341,8 @@ export default function AdminPanel() {
             >
               Editori
             </Link>
-            <Link 
-              to="" 
+            <Link
+              to=""
               onClick={() => setActiveTab('admins')}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'admins' 
@@ -244,8 +352,8 @@ export default function AdminPanel() {
             >
               Administrátori
             </Link>
-            <Link 
-              to="" 
+            <Link
+              to=""
               onClick={() => setActiveTab('subpages')}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'subpages' 
@@ -273,7 +381,7 @@ export default function AdminPanel() {
       {activeTab === 'years' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Ročníky konferencie</h2>
-          
+
           <div className="flex flex-col gap-4 lg:flex-row mb-4">
             <input
               type="text"
@@ -286,7 +394,7 @@ export default function AdminPanel() {
               <FaPlus className="mr-1" /> Pridať
             </button>
           </div>
-          
+
           <ul className="divide-y divide-gray-200">
             {conferenceYears.map((yearObj: conferenceYear) => (
               <li key={yearObj.id} className="py-3 flex items-center justify-between">
@@ -303,24 +411,26 @@ export default function AdminPanel() {
       {activeTab === 'editors' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Editori</h2>
-          
+
           <div className="mb-4">
-            <EditorAddModal 
-              onEditorAdded={handleEditorAdded} 
-              conferenceYears={conferenceYears} 
+            <EditorAddModal
+              onEditorAdded={handleEditorAdded}
+              conferenceYears={conferenceYears}
             />
           </div>
+
           <ul className="divide-y divide-gray-200">
             {(editors).map((editor: any) => {
-              const assignedYearId = editor.conference_years.length > 0 ? editor.conference_years[0].id.toString() : "";
+              const years = editor.conference_years ?? [];
+              const assignedYearId = years.length > 0 ? years[0].id.toString() : "";
 
               return (
                 <li key={editor.id} className="py-3 flex flex-col lg:flex-row items-start gap-2 lg:gap-16">
                   <span className="font-medium">{editor.email}</span>
                   <span className="font-medium">{editor.name}</span>
                   <span className="font-medium">
-                    {editor.conference_years.length > 0
-                      ? editor.conference_years[0].year
+                    {years.length > 0
+                      ? years[0].year
                       : "Nie je priradený ročník"}
                   </span>
                   <div className="flex flex-col lg:flex-row gap-2 space-x-2">
@@ -353,11 +463,11 @@ export default function AdminPanel() {
       {activeTab === 'admins' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Administrátori</h2>
-          
+
           <div className="flex flex-col gap-2 lg:flex-row mb-4">
             <AdminAddModal onAdminAdded={handleAdminAdded} />
           </div>
-          
+
           <ul className="divide-y divide-gray-200">
             {admins.map((adminObj) => (
               <li key={adminObj.id} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
@@ -374,7 +484,7 @@ export default function AdminPanel() {
       {activeTab === 'subpages' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Podstránky</h2>
-          
+
           <div className="space-y-2 mb-4">
             <input
               type="text"
@@ -435,9 +545,6 @@ export default function AdminPanel() {
                     </td>
                   </tr>
               ))}
-
-
-
               </tbody>
             </table>
           </div>
