@@ -5,11 +5,13 @@ import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
 import {subpageData} from "../types.ts";
+import Notification from '../components/Notification.tsx';
 
 export default function EditorPanel() {
   const [activeTab, setActiveTab] = useState('subpages');
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [subpages, setSubpages] = useState<subpageData[]>([]);
+  const [notification, setNotification] = useState({ success: false, message: "", show: false });
   const [subpageTitle, setSubpageTitle] = useState("");
   const [year, setYear] = useState();
   const navigate = useNavigate();
@@ -67,8 +69,17 @@ export default function EditorPanel() {
     try {
       const res = await api.post("/subpages", {title: subpageTitle, year: year})
       setSubpages(prev => [res.data.data, ...prev].sort((a: subpageData, b: subpageData) => b.year - a.year))
+      setNotification({
+        success: true,
+        message: "Subpage succesfully added!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e);
+      setNotification({
+        success: false,
+        message: "Something went wrong while adding new Subpage!",
+        show: true,
+      });
     }
   }
 
@@ -76,8 +87,17 @@ export default function EditorPanel() {
     try {
       await api.delete(`/subpages/${subpage}`)
       setSubpages(prev => prev.filter((subpages: subpageData) => subpages.id != subpage))
+      setNotification({
+        success: true,
+        message: "Subpage succesfully deleted!",
+        show: true,
+      });
     } catch (e: unknown) {
-      console.log(e)
+      setNotification({
+        success: false,
+        message: "Something went wrong while deleting new Subpage!",
+        show: true,
+      });
     }
   }
 
@@ -87,6 +107,13 @@ export default function EditorPanel() {
 
   return (
     <div className="p-6 bg-gray-100 mt-24 lg:mt-36">
+      {notification.show && (
+              <Notification
+                success={notification.success}
+                message={notification.message}
+                onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
+              />
+      )}
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <h3 className='text-xl'>Welcome  {user.name}</h3>
