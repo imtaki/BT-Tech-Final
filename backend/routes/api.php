@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\EditorController;
 use App\Http\Controllers\Api\SubPageController;
 use App\Http\Controllers\Api\ConferenceYearController;
+use App\Http\Controllers\Api\UploadsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,9 +17,11 @@ Route::get('/subpages/by-id/{id}/edit', [SubPageController::class, "checkEditorP
 Route::get('/subpages/by-year/{year}', [SubPageController::class, "byYear"]);
 Route::get('/subpages/editor', [SubPageController::class, "getEditorSubpages"]);
 Route::get('/editor-year', [EditorController::class, "getYear"]);
+Route::get('/files', [UploadsController::class, "index"]);
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
+Route::post('/file-upload', [UploadsController::class, "store"]);
 Route::middleware(['auth:api', 'role.check'])->get('/role-check', function (Request $request) {
     return response()->json(["success" => "Accessed admin/editor panel."]);
 });

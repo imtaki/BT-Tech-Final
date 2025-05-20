@@ -4,7 +4,7 @@ import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
-import {conferenceYear, subpageData, adminUser, editorUser} from "../types.ts";
+import {conferenceYear, subpageData, adminUser, editorUser, customFile} from "../types.ts";
 import AdminAddModal from '../components/AdminAddModal.tsx';
 import EditorAddModal from '../components/EditorAddModal.tsx';
 import Notification from '../components/Notification.tsx';
@@ -16,10 +16,12 @@ export default function AdminPanel() {
   const [newYear, setNewYear] = useState("");
   const [subpages, setSubpages] = useState<subpageData[]>([]);
   const [subpageTitle, setSubpageTitle] = useState("");
-  const [subpageYear, setSubpageYear] = useState(new Date().getFullYear().toString()); // OP Pro fix - lebo sa mi to nechcelo inak logovat, funguje aj na buduce roky!
+  const [subpageYear, setSubpageYear] = useState(new Date().getFullYear().toString());
   const [admins, setAdmins] = useState<adminUser[]>([]);
   const [editors, setEditors] = useState<editorUser[]>([]);
   const [notification, setNotification] = useState({ success: false, message: "", show: false });
+  const [file, setFile] = useState<File | null>();
+  const [files, setFiles] = useState<customFile[]>([]);
   const navigate = useNavigate();
 
   const user = getUser();
@@ -99,6 +101,18 @@ export default function AdminPanel() {
     fetchEditors();
   }, []);
 
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const res = await api.get("/files");
+        setFiles(res.data)
+      } catch (e: any) {
+        console.log(e);
+      }
+    }
+    fetchFiles()
+  }, []);
+
   const handleAddYear = async () => {
     try {
       const res = await api.post("/conference-years", { year: newYear })
@@ -171,7 +185,7 @@ export default function AdminPanel() {
       });
     }
   }
-  
+
   const handleDeleteAdmin = async (adminId: number) => {
     try {
       await api.delete(`/admins/${adminId}`);
@@ -271,6 +285,23 @@ export default function AdminPanel() {
     fetchEditors();
   };
 
+  const addFile = async () => {
+    if (!file) return
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await api.post("/file-upload", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }});
+      console.log(res.data);
+    } catch (e: any) {
+      console.log(e);
+    }
+  }
+
   if(!authorized) {
     return null
   }
@@ -289,7 +320,7 @@ export default function AdminPanel() {
           <h3 className='text-xl'>Welcome  {user.name}</h3>
           <nav className="-mb-px mt-4 grid grid-cols-2 lg:flex gap-x-10 space-x-8">
             <Link
-              to="" 
+              to=""
               onClick={() => setActiveTab('years')}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'years' 
@@ -299,8 +330,8 @@ export default function AdminPanel() {
             >
               Ročníky konferencie
             </Link>
-            <Link 
-              to="" 
+            <Link
+              to=""
               onClick={() => setActiveTab('editors')}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'editors' 
@@ -310,8 +341,8 @@ export default function AdminPanel() {
             >
               Editori
             </Link>
-            <Link 
-              to="" 
+            <Link
+              to=""
               onClick={() => setActiveTab('admins')}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'admins' 
@@ -321,8 +352,8 @@ export default function AdminPanel() {
             >
               Administrátori
             </Link>
-            <Link 
-              to="" 
+            <Link
+              to=""
               onClick={() => setActiveTab('subpages')}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'subpages' 
@@ -332,6 +363,17 @@ export default function AdminPanel() {
             >
               Podstránky
             </Link>
+            <Link
+                to=""
+                onClick={() => setActiveTab('files')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'files'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+            >
+              Súbory
+            </Link>
           </nav>
         </div>
       </div>
@@ -339,7 +381,7 @@ export default function AdminPanel() {
       {activeTab === 'years' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Ročníky konferencie</h2>
-          
+
           <div className="flex flex-col gap-4 lg:flex-row mb-4">
             <input
               type="text"
@@ -352,7 +394,7 @@ export default function AdminPanel() {
               <FaPlus className="mr-1" /> Pridať
             </button>
           </div>
-          
+
           <ul className="divide-y divide-gray-200">
             {conferenceYears.map((yearObj: conferenceYear) => (
               <li key={yearObj.id} className="py-3 flex items-center justify-between">
@@ -371,9 +413,9 @@ export default function AdminPanel() {
           <h2 className="text-xl font-semibold mb-4">Editori</h2>
 
           <div className="mb-4">
-            <EditorAddModal 
-              onEditorAdded={handleEditorAdded} 
-              conferenceYears={conferenceYears} 
+            <EditorAddModal
+              onEditorAdded={handleEditorAdded}
+              conferenceYears={conferenceYears}
             />
           </div>
 
@@ -421,11 +463,11 @@ export default function AdminPanel() {
       {activeTab === 'admins' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Administrátori</h2>
-          
+
           <div className="flex flex-col gap-2 lg:flex-row mb-4">
             <AdminAddModal onAdminAdded={handleAdminAdded} />
           </div>
-          
+
           <ul className="divide-y divide-gray-200">
             {admins.map((adminObj) => (
               <li key={adminObj.id} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
@@ -442,7 +484,7 @@ export default function AdminPanel() {
       {activeTab === 'subpages' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Podstránky</h2>
-          
+
           <div className="space-y-2 mb-4">
             <input
               type="text"
@@ -507,6 +549,29 @@ export default function AdminPanel() {
             </table>
           </div>
         </div>
+      )}
+
+      {activeTab === 'files' && (
+          <div className="bg-white p-4 rounded-lg">
+            <label className="block mb-2 text-xl font-semibold" htmlFor="file_input">
+              Nahraj súbor
+            </label>
+            <input
+                className="block mt-4 w-12/12 lg:w-96 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 file:bg-gray-200 file:p-2 file:border-r-2 file:border-r-gray-50"
+                id="file_input" type="file" onChange={(e) => setFile(e.target.files === null ? null : e.target.files[0])}
+            />
+            <button onClick={addFile} className="p-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer rounded-lg text-white mt-4 min-w-24">Nahraj</button>
+            <div className="mt-4 lg:max-w-6/12">
+              <p>Súbory</p>
+              {files.map(file =>
+                  <div key={file.id} className="p-2 border-2 mt-2 border-gray-200 overflow-x-auto">
+                    <p className="">{file.name}</p>
+                    <a href={`${import.meta.env.VITE_URL}/${file.path}`} className="p-1 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-sm mt-2">Stiahnúť</a>
+                    <button className="p-1 bg-red-500 hover:bg-red-600 hover:cursor-pointer rounded-sm text-white ml-2">Odstrániť</button>
+                  </div>
+              )}
+            </div>
+          </div>
       )}
     </div>
   );
