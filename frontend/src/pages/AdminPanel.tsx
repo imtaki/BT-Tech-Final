@@ -566,7 +566,7 @@ export default function AdminPanel() {
               {files.map(file =>
                   <div key={file.id} className="p-2 border-2 mt-2 border-gray-200 overflow-x-auto">
                     <p className="">{file.name}</p>
-                    <a href={`${import.meta.env.VITE_URL}/${file.path}`} className="p-1 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-sm mt-2">Stiahnúť</a>
+                    <a href={`${import.meta.env.VITE_URL}storage/${file.path}`} className="p-1 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-sm mt-2">Stiahnúť</a>
                     <button className="p-1 bg-red-500 hover:bg-red-600 hover:cursor-pointer rounded-sm text-white ml-2">Odstrániť</button>
                   </div>
               )}
