@@ -3,9 +3,11 @@ import { BiSolidRightArrow, BiSolidLeftArrow } from "react-icons/bi";
 import {useState, useEffect} from "react";
 import api from "../utils/axios";
 import {conferenceYear} from "../types.ts";
+import Skeleton from "react-loading-skeleton";
 
 export default function Sidebar() {
     const [sidebarActive, setSidebarActive] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [conferenceYears, setConferenceYears] = useState<conferenceYear[]>([]);
     const [errorMessage, setMessage] = useState("");
 
@@ -16,8 +18,10 @@ export default function Sidebar() {
             const res = await api.get("/conference-years");
             setConferenceYears(res.data)
         } catch (error: any) {
-        setMessage(error.response.statusText);
-    }
+            setMessage(error.response.statusText);
+        } finally {
+            setLoading(false);
+        }
    }
     fetchConferenceYears();
   }, []);
@@ -39,7 +43,7 @@ export default function Sidebar() {
 
                 <div className="py-4">
                     <div className="pl-4 mt-4">
-                        {conferenceYears.map((yearObj) => (
+                        {loading ? <Skeleton baseColor="#e8e8e8" highlightColor="#cdcdcd" height={80} width={100}/> : conferenceYears.map((yearObj) => (
                          <div key={yearObj.id} className="mb-2 flex items-center">
                             <div className="h-4 w-1 bg-orange-400 mr-2"></div>
                             <Link to={`/${yearObj.year}`} className="block py-1">

@@ -1,6 +1,7 @@
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import './index.css'
+import 'react-loading-skeleton/dist/skeleton.css';
 import { BrowserRouter, Route, Routes} from 'react-router'
 import Login from './pages/Login';
 import About from './pages/About';

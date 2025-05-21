@@ -4,36 +4,47 @@ import {subpageData} from "../types.ts";
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
 import DOMPurify from "dompurify";
+import Skeleton from "react-loading-skeleton";
 
 const SubpageView = () => {
     const {year, id} = useParams();
-    const [subpageFound, setSubpageFound] = useState<boolean | null>(null)
+    const [loading, setLoading] = useState(true);
     const [subpage, setSubpage] = useState<subpageData>();
-    const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
         const fetchSubpageData = async () => {
             try {
                 const res = await api.get(`/subpages/by-id/${id}`);
                 if (res.data.year !== Number(year)) {
-                    setSubpageFound(false);
-                    setError("Page not found.");
                     return
                 }
                 setSubpage(res.data);
-                setSubpageFound(true);
             } catch (e: unknown) {
-                setSubpageFound(false)
                 if (e instanceof AxiosError) {
-                    setError("Page not found.");
+                    console.log(e.response?.statusText);
                 }
+            } finally {
+                setLoading(false);
             }
         }
         fetchSubpageData()
     }, [id]);
 
-    if (!subpageFound || !subpage) {
-        return <p>{error}</p>
+    if (loading) {
+        return (
+          <>
+              <div className="text-center">
+                  <Skeleton baseColor="#e8e8e8" highlightColor="#cdcdcd" height={30} width={200}/>
+              </div>
+              <div className="lg:px-48 mt-4 w-full">
+                  <Skeleton baseColor="#e8e8e8" highlightColor="#cdcdcd" height={500}/>
+              </div>
+          </>
+        );
+    }
+
+    if (!subpage) {
+        return <p className="prose-lg text-center">Page not found.</p>
     }
 
     return (
