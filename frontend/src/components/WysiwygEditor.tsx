@@ -1,15 +1,35 @@
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import DOMPurify from 'dompurify'
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
 import Notification from './Notification.tsx';
+import {customFile} from "../types.ts";
+import {FaCopy} from "react-icons/fa";
 
 export default function WysiwygEditor(props : {id: number, title: string, content: string}) {
     const [htmlString, setHtmlString] = useState("");
     const [title, setTitle] = useState(props.title);
     const [notification, setNotification] = useState({ success: false, message: "", show: false });
+    const [files, setFiles] = useState<customFile[]>([]);
     const editorRef = useRef<any>(null);
+
+    useEffect(() => {
+        const fetchFiles = async () =>{
+            try {
+                const res = await api.get("/uploads");
+                setFiles(res.data);
+            } catch (e) {
+                console.error(e);
+                setNotification({
+                   show: true,
+                   success: false,
+                   message: "Error while fetching the files."
+                });
+            }
+        }
+        fetchFiles();
+    }, []);
 
     const handleSave = async () => {
         try {
@@ -30,6 +50,15 @@ export default function WysiwygEditor(props : {id: number, title: string, conten
         }
     }
 
+    const copyLink = (link: string) => {
+        navigator.clipboard.writeText(link)
+        setNotification({
+            show: true,
+            success: true,
+            message: "Link copied."
+        });
+    }
+
     return (
         <>
             {notification.show && (
@@ -39,7 +68,8 @@ export default function WysiwygEditor(props : {id: number, title: string, conten
                 onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
               />
             )}
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center">
+                <p className="mb-2 text-xl font-bold">Subpage Title</p>
                 <input
                     type="text"
                     placeholder={props.title}
@@ -79,6 +109,19 @@ export default function WysiwygEditor(props : {id: number, title: string, conten
                             className="bg-orange-400 p-2 mt-4 ml-2 rounded-xl text-white">
                         Save content
                     </button>
+                    <div className="bg-white rounde-xl mt-4 w-full max-h-80 overflow-x-auto p-4">
+                        <p className="text-gray-800 mb-4 text-xl">Files</p>
+                        {files.length === 0 ? <p>No files uploaded</p> : files.map((file =>
+                            <div className="flex gap-3" key={file.id}>
+                                <a className="text-blue-400" href={`${import.meta.env.VITE_URL}storage/${file.path}`}>{file.name}</a>
+                                <span
+                                    onClick={() => copyLink(import.meta.env.VITE_URL + "storage/" + file.path)}
+                                    className="mt-1 hover:cursor-pointer">
+                                    <FaCopy color="#cdcdcd" />
+                                </span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </>

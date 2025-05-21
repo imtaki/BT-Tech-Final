@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import api from "../utils/axios.ts";
 import {subpageData} from "../types.ts";
 import {AxiosError} from "axios";
+import Skeleton from "react-loading-skeleton";
 
 export default function EditSubpage() {
     const navigate = useNavigate();
@@ -21,11 +22,9 @@ export default function EditSubpage() {
                 if (res.data.message === "editor") {
                     await api.get(`/subpages/by-id/${id}/edit`);
                 }
-            } catch (e: unknown) {
-                if (e instanceof AxiosError) {
-                    setAuthorized(false);
-                    setErrorMessage(e.response?.data.message);
-                }
+            } catch (e) {
+                console.error(e);
+                navigate("/");
             }
         }
         checkAuthorization();
@@ -49,8 +48,14 @@ export default function EditSubpage() {
     }, []);
 
 
-    if (!subpage || !subpageFound || !authorized) {
-        return <p className="mt-24 lg:mt-36">Error: {errorMessage}</p>;
+    if (!subpage) {
+        return (
+            <div className="mt-24 lg:mt-36 w-full flex justify-center">
+                <div className="w-full lg:w-6/12">
+                    <Skeleton height={800} />
+                </div>
+            </div>
+        );
     }
 
     return (

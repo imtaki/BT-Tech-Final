@@ -8,6 +8,7 @@ import {conferenceYear, subpageData, adminUser, editorUser, customFile} from "..
 import AdminAddModal from '../components/AdminAddModal.tsx';
 import EditorAddModal from '../components/EditorAddModal.tsx';
 import Notification from '../components/Notification.tsx';
+import {DotLoader} from "react-spinners";
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -22,6 +23,7 @@ export default function AdminPanel() {
   const [notification, setNotification] = useState({ success: false, message: "", show: false });
   const [file, setFile] = useState<File | null>();
   const [files, setFiles] = useState<customFile[]>([]);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const navigate = useNavigate();
 
   const user = getUser();
@@ -104,10 +106,10 @@ export default function AdminPanel() {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await api.get("/files");
+        const res = await api.get("/uploads");
         setFiles(res.data)
-      } catch (e: any) {
-        console.log(e);
+      } catch (e) {
+        console.error(e);
       }
     }
     fetchFiles()
@@ -123,7 +125,8 @@ export default function AdminPanel() {
         show: true,
       });
       setNewYear("")
-    } catch (e: unknown) {
+    } catch (e) {
+      console.error(e);
       setNotification({
         success: false,
         message: "Something went wrong while adding new Year!",
@@ -141,7 +144,8 @@ export default function AdminPanel() {
         message: "Year succesfully deleted!",
         show: true,
       });
-    } catch (e: unknown) {
+    } catch (e) {
+      console.error(e);
       setNotification({
         success: false,
         message: "Something went wrong while deleting Year!",
@@ -159,7 +163,8 @@ export default function AdminPanel() {
         message: "Subpage succesfully added!",
         show: true,
       });
-    } catch (e: unknown) {
+    } catch (e) {
+      console.error(e);
       setNotification({
         success: false,
         message: "Something went wrong while adding new Subpage!",
@@ -177,7 +182,8 @@ export default function AdminPanel() {
         message: "Subpage succesfully deleted!",
         show: true,
       });
-    } catch (e: unknown) {
+    } catch (e) {
+      console.error(e);
       setNotification({
         success: false,
         message: "Something went wrong while deleting new Subpage!",
@@ -195,7 +201,8 @@ export default function AdminPanel() {
         message: "Admin succesfully deleted!",
         show: true,
       });
-    } catch (e: unknown) {
+    } catch (e) {
+      console.error(e);
       setNotification({
         success: false,
         message: "Something went wrong while deleting Admin!",
@@ -213,7 +220,8 @@ export default function AdminPanel() {
         message: "Editor succesfully deleted!",
         show: true,
       });
-    } catch (e: unknown) {
+    } catch (e) {
+      console.error(e);
       setNotification({
         success: false,
         message: "Something went wrong while deleting Editor!",
@@ -232,7 +240,8 @@ export default function AdminPanel() {
         message: "Succesfully assigned year to Editor!",
         show: true,
       });
-    } catch (e: unknown) {
+    } catch (e) {
+      console.error(e);
       setNotification({
         success: false,
         message: "Failed to assign year to editor!",
@@ -292,14 +301,47 @@ export default function AdminPanel() {
     formData.append('file', file);
 
     try {
-      const res = await api.post("/file-upload", formData, {
+      setUploadLoading(true);
+      await api.post("/uploads/", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }});
-      console.log(res.data);
-    } catch (e: any) {
-      console.log(e);
+      const files = await api.get("/uploads");
+      setFiles(files.data);
+      setNotification({
+        success: true,
+        message: "The file has been added!",
+        show: true,
+      });
+    } catch (e) {
+      console.error("Failed to add file", e);
+      setNotification({
+        success: false,
+        message: "Failed to add file.",
+        show: true,
+      });
+    } finally {
+      setUploadLoading(false);
     }
+  }
+
+  const removeFile = async (id: number) => {
+      try {
+        await api.delete(`/uploads/${id}`);
+        setFiles(prev => prev.filter((file: customFile) => file.id != id))
+        setNotification({
+          success: true,
+          message: "The file has been removed!",
+          show: true,
+        });
+      } catch (e) {
+        console.error("Failed to remove file", e);
+        setNotification({
+          success: false,
+          message: "Failed to remove file.",
+          show: true,
+        });
+      }
   }
 
   if(!authorized) {
@@ -420,7 +462,7 @@ export default function AdminPanel() {
           </div>
 
           <ul className="divide-y divide-gray-200">
-            {(editors).map((editor: any) => {
+            {(editors).map((editor: editorUser) => {
               const years = editor.conference_years ?? [];
               const assignedYearId = years.length > 0 ? years[0].id.toString() : "";
 
@@ -558,16 +600,32 @@ export default function AdminPanel() {
             </label>
             <input
                 className="block mt-4 w-12/12 lg:w-96 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 file:bg-gray-200 file:p-2 file:border-r-2 file:border-r-gray-50"
-                id="file_input" type="file" onChange={(e) => setFile(e.target.files === null ? null : e.target.files[0])}
+                id="file_input" type="file"
+                accept=".png,.jpeg,.jpg,.doc,.docx,.pdf"
+                onChange={(e) => setFile(e.target.files === null ? null : e.target.files[0])}
             />
-            <button onClick={addFile} className="p-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer rounded-lg text-white mt-4 min-w-24">Nahraj</button>
-            <div className="mt-4 lg:max-w-6/12">
+            <p className="text-xs text-gray-400">Podporvané formáty sú: jpeg, png, jpg, doc, docx, pdf</p>
+            <p className="text-xs text-gray-400">Maximálna veľkosť súboru sú 2MB.</p>
+            <div className="flex">
+              <button onClick={addFile}
+                      className="p-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer rounded-lg text-white mt-4 min-w-24">Nahraj
+              </button>
+              <div className={`mt-6 ml-4 ${uploadLoading ? "block" : "hidden"}`}>
+                <DotLoader size={15} color="#cdcdcd"/>
+              </div>
+            </div>
+            <div className="mt-4 lg:max-w-6/12 max-h-80 overflow-y-auto">
               <p>Súbory</p>
               {files.map(file =>
                   <div key={file.id} className="p-2 border-2 mt-2 border-gray-200 overflow-x-auto">
                     <p className="">{file.name}</p>
-                    <a href={`${import.meta.env.VITE_URL}storage/${file.path}`} className="p-1 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-sm mt-2">Stiahnúť</a>
-                    <button className="p-1 bg-red-500 hover:bg-red-600 hover:cursor-pointer rounded-sm text-white ml-2">Odstrániť</button>
+                    <a href={`${import.meta.env.VITE_URL}storage/${file.path}`}
+                       className="p-1 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-sm mt-2">Stiahnúť</a>
+                    <button
+                        className="p-1 bg-red-500 hover:bg-red-600 hover:cursor-pointer rounded-sm text-white ml-2"
+                        onClick={() => removeFile(file.id)}
+                    >Odstrániť
+                    </button>
                   </div>
               )}
             </div>

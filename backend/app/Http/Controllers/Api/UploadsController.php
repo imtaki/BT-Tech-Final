@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Upload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UploadsController extends Controller
 {
@@ -31,7 +32,7 @@ class UploadsController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'file' => 'required|file|mimes:jpeg,png,jpg,gif,svg,doc,docx,pdf|max:2048',
+            'file' => 'required|file|mimes:jpeg,png,jpg,doc,docx,pdf|max:2048',
         ]);
         $user = auth('api')->user();
         if (!$user || ($user->role != "admin" && $user->role != "editor")) {
@@ -76,6 +77,8 @@ class UploadsController extends Controller
      */
     public function destroy(Upload $upload)
     {
-        //
+        Storage::disk("public")->delete($upload->path);
+        $upload->delete();
+        return response()->json(['message' => 'File deleted', 'data' => $upload]);
     }
 }
