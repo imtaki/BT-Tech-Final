@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
+import { uploadFileToSupabaseAndLaravel } from '../utils/FileUpload.ts';
 import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
@@ -104,7 +105,7 @@ export default function AdminPanel() {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await api.get("/files");
+        const res = await api.get("/cloud-files");
         setFiles(res.data)
       } catch (e: any) {
         console.log(e);
@@ -301,6 +302,20 @@ export default function AdminPanel() {
       console.log(e);
     }
   }
+
+  const addFiles = async () => {
+  if (!file) return;
+
+  try {
+    const token = localStorage.getItem('token'); // or use Auth context
+    const uploaded = await uploadFileToSupabaseAndLaravel(file, token);
+    setFiles(prev => [...prev, uploaded.file]);
+    setFile(null);
+  } catch (err) {
+    console.error(err);
+    alert('Upload failed');
+  }
+};
 
   if(!authorized) {
     return null
@@ -560,7 +575,7 @@ export default function AdminPanel() {
                 className="block mt-4 w-12/12 lg:w-96 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 file:bg-gray-200 file:p-2 file:border-r-2 file:border-r-gray-50"
                 id="file_input" type="file" onChange={(e) => setFile(e.target.files === null ? null : e.target.files[0])}
             />
-            <button onClick={addFile} className="p-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer rounded-lg text-white mt-4 min-w-24">Nahraj</button>
+            <button onClick={addFiles} className="p-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer rounded-lg text-white mt-4 min-w-24">Nahraj</button>
             <div className="mt-4 lg:max-w-6/12">
               <p>Súbory</p>
               {files.map(file =>
