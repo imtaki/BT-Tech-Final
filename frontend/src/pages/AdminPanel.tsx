@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
 import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
-import { uploadFileToSupabaseAndLaravel } from '../utils/FileUpload.ts';
 import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
@@ -9,7 +8,7 @@ import {conferenceYear, subpageData, adminUser, editorUser, customFile} from "..
 import AdminAddModal from '../components/AdminAddModal.tsx';
 import EditorAddModal from '../components/EditorAddModal.tsx';
 import Notification from '../components/Notification.tsx';
-import {DotLoader} from "react-spinners";
+import DragDropFileUpload from '../components/DragAndDrop.tsx';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -512,14 +511,22 @@ export default function AdminPanel() {
           </div>
 
           <ul className="divide-y divide-gray-200">
-            {admins.map((adminObj) => (
-              <li key={adminObj.id} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
-                <span className="font-medium">{adminObj.email}</span>
-                <button onClick={() => handleDeleteAdmin(adminObj.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center">
-                  <FaMinus className="mr-1" /> Odstrániť
-                </button>
-              </li>
-            ))}
+            {admins.map((adminObj) => {
+               const isCurrentAdmin = user && adminObj.id === user.id;
+                return (
+                  <li key={adminObj.id} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
+                    <span className="font-medium">{adminObj.email}</span>
+                    <button
+                      onClick={() => handleDeleteAdmin(adminObj.id)}
+                      disabled={isCurrentAdmin}
+                      className={`${isCurrentAdmin ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'
+                                } text-white px-3 py-1 rounded flex items-center`} >
+                      <FaMinus className="mr-1" />
+                        {isCurrentAdmin ? 'Nemôžete sa odstrániť' : 'Odstrániť'}
+                     </button>
+                  </li>
+                  );
+              })}
           </ul>
         </div>
       )}
@@ -595,41 +602,15 @@ export default function AdminPanel() {
       )}
 
       {activeTab === 'files' && (
-          <div className="bg-white p-4 rounded-lg">
-            <label className="block mb-2 text-xl font-semibold" htmlFor="file_input">
-              Nahraj súbor
-            </label>
-            <input
-                className="block mt-4 w-12/12 lg:w-96 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 file:bg-gray-200 file:p-2 file:border-r-2 file:border-r-gray-50"
-                id="file_input" type="file"
-                accept=".png,.jpeg,.jpg,.doc,.docx,.pdf"
-                onChange={(e) => setFile(e.target.files === null ? null : e.target.files[0])}
-            />
-            <p className="text-xs text-gray-400">Podporvané formáty sú: jpeg, png, jpg, doc, docx, pdf</p>
-            <p className="text-xs text-gray-400">Maximálna veľkosť súboru sú 2MB.</p>
-            <div className="flex">
-              <button onClick={addFile}
-                      className="p-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer rounded-lg text-white mt-4 min-w-24">Nahraj
-              </button>
-              <div className={`mt-6 ml-4 ${uploadLoading ? "block" : "hidden"}`}>
-                <DotLoader size={15} color="#cdcdcd"/>
-              </div>
-            </div>
-            <div className="mt-4 lg:max-w-6/12 max-h-80 overflow-y-auto">
-              <p>Súbory</p>
-              {files.map(file =>
-                  <div key={file.id} className="p-2 border-2 mt-2 border-gray-200 overflow-x-auto">
-                    <p className="">{file.name}</p>
-                    <a href={`${import.meta.env.VITE_URL}storage/${file.path}`}
-                       className="p-1 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-sm mt-2">Stiahnúť</a>
-                    <button
-                        className="p-1 bg-red-500 hover:bg-red-600 hover:cursor-pointer rounded-sm text-white ml-2"
-                        onClick={() => removeFile(file.id)}
-                    >Odstrániť
-                    </button>
-                  </div>
-              )}
-            </div>
+          <div className="shadow rounded-lg mb-6">
+              <DragDropFileUpload 
+                file={file}
+                setFile={setFile}
+                files={files}
+                uploadLoading={uploadLoading}
+                onUpload={addFile}
+                onRemove={removeFile}
+              />
           </div>
       )}
     </div>

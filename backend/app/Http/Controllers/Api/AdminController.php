@@ -36,6 +36,9 @@ class AdminController extends Controller
 
     public function destroy(User $admin)
     {
+        if (auth()->id() == $admin->id) {
+            return response()->json(['error' => 'Nemôžete odstrániť sami seba.'], 403);
+        }
         $admin->delete();
         return response()->json(['message' => 'Admin deleted', 'data' => $admin]);
     }
