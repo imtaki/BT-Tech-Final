@@ -2,22 +2,20 @@ import WysiwygEditor from "../components/WysiwygEditor.tsx";
 import {useNavigate, useParams} from "react-router";
 import {useEffect, useState} from "react";
 import api from "../utils/axios.ts";
-import {subpageData} from "../types.ts";
+import {pageData} from "../types.ts";
 import Skeleton from "react-loading-skeleton";
 
-export default function EditSubpage() {
+export default function EditPage() {
     const navigate = useNavigate();
-    const {id} = useParams();
-    const [subpage, setSubpage] = useState<subpageData>();
+    const {slug} = useParams();
+    const [page, setPage] = useState<pageData>();
 
     useEffect(() => {
         const checkAuthorization = async () => {
             try {
                 const res = await api.get("/role-check");
                 if (res.data.message === "editor") {
-                    const res = await api.get(`/subpages/by-slug/${id}`);
-                    const subpage_id = res.data.id;
-                    await api.get(`/subpages/by-slug/${subpage_id}/edit`);
+                    navigate("/");
                 }
             } catch (e) {
                 console.error(e);
@@ -28,20 +26,20 @@ export default function EditSubpage() {
     }, []);
 
     useEffect(() => {
-        const getSubpageData = async () => {
+        const getPageData = async () => {
             try {
-                const res = await api.get(`/subpages/by-slug/${id}`);
-                setSubpage(res.data);
+                const res = await api.get(`/pages/by-slug/${slug}`);
+                setPage(res.data);
             } catch (e) {
-                console.error(e)
-                navigate("/not-found");
+                console.error(e);
+                navigate("/")
             }
         }
-        getSubpageData();
+        getPageData();
     }, []);
 
 
-    if (!subpage) {
+    if (!page) {
         return (
             <div className="mt-24 lg:mt-36 w-full flex justify-center">
                 <div className="w-full lg:w-6/12">
@@ -54,13 +52,13 @@ export default function EditSubpage() {
     return (
         <div className="mt-24 lg:mt-36 w-full">
             <WysiwygEditor
-                id={subpage.id}
-                title={subpage.title}
-                slug={subpage.slug}
-                content={subpage.content}
-                isPage={false}
-                isIndex={false}
-                isLink={false}
+                id={page.id}
+                title={page.title}
+                slug={page.slug}
+                content={page.content}
+                isPage={true}
+                isIndex={page.is_index}
+                isLink={page.is_link}
             />
         </div>
     )

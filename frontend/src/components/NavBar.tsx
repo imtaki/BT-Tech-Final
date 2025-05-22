@@ -5,15 +5,11 @@ import { Link, useNavigate, useLocation } from "react-router";
 import { getRole, isLoggedIn  } from "../utils/auth";
 import { IoLogOutOutline } from "react-icons/io5";
 import { GiHamburgerMenu } from "react-icons/gi";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import api from "../utils/axios.ts";
 
 export default function NavBar() {
-    const navItems = [
-        { id: 0, label: "Studies", href: "/studies" },
-        { id: 1, label: "Research", href: "/research" },
-        { id: 2, label: "About", href: "/about" },
-    ];
-
+    const [navItems, setNavItems] = useState([]);
     const loggedIn = isLoggedIn();
     const role = getRole();
 
@@ -27,6 +23,18 @@ export default function NavBar() {
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname;
+
+    useEffect(() => {
+        const fetchPages = async () => {
+            try {
+                const res = await api.get("/pages");
+                setNavItems(res.data);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        fetchPages();
+    }, []);
 
     const [dropdownActive, setDropdownActive] = useState(false);
 
@@ -49,17 +57,17 @@ export default function NavBar() {
                     />
                 </div>
                 <ul className="hidden lg:block lg:flex space-x-6 text-gray-700 font-medium">
-                    {navItems.map((item) => (
+                    {navItems.filter(prev => prev.is_link).map((item) => (
                         <li key={item.id}>
                             <Link
-                                to={item.href}
+                                to={item.is_index ? "/" : item.slug}
                                 className={
-                                    currentPath === item.href
+                                    currentPath === item.slug
                                         ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
                                         : "hover:text-orange-400 hover:underline underline-offset-2"
                                 }
                             >
-                                {item.label}
+                                {item.title}
                             </Link>
                         </li>
                     ))}
@@ -104,18 +112,17 @@ export default function NavBar() {
                 </ul>
             </nav>
             <ul className={`lg:hidden fixed left-0 bg-white w-full z-30 px-6 ${dropdownActive ? "top-[95px] ease-in-out duration-300" : "top-[-200px] ease-in-out duration-300"}`}>
-                {navItems.map((item) => (
+                {navItems.filter(prev => prev.is_link).map((item) => (
                     <li key={item.id} className="p-2">
                         <Link
-                            to={item.href}
+                            to={item.is_index ? "/" : item.slug}
                             className={
-                                currentPath === item.href
+                                currentPath === item.slug
                                     ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
                                     : "hover:text-orange-400 hover:underline underline-offset-2"
                             }
-                            onClick={() => setDropdownActive(!dropdownActive)}
                         >
-                            {item.label}
+                            {item.title}
                         </Link>
                     </li>
                 ))}
