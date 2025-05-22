@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\EditorController;
 use App\Http\Controllers\Api\SubPageController;
 use App\Http\Controllers\Api\ConferenceYearController;
 use App\Http\Controllers\Api\UploadsController;
+use App\Http\Controllers\Api\SupabaseUploadsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -23,6 +24,8 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api')
 Route::middleware(['auth:api', 'role.check'])->get('/role-check', function (Request $request) {
     return response()->json(["success" => "Accessed admin/editor panel."]);
 });
+Route::delete('/cloud-files/{upload}', [SupabaseUploadsController::class, 'destroy']);
+
 Route::apiResource('conference-years', ConferenceYearController::class);
 Route::apiResource('subpages', SubPageController::class);
 Route::apiResource('admins', AdminController::class);

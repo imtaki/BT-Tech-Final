@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
+import { uploadFileToSupabaseAndLaravel } from '../utils/FileUpload.ts';
 import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
