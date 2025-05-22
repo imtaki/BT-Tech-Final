@@ -34,6 +34,12 @@ class SubpageController extends Controller
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
+        $duplicate_slug = Subpages::where('slug', $validate['slug'])->first();
+
+        if ($duplicate_slug) {
+            return response()->json(['message' => 'Duplicate page/slug.'], 400);
+        }
+
         $subpage = Subpages::create([
            'title' => $validate['title'],
            'year' => $validate['year'],
@@ -58,6 +64,12 @@ class SubpageController extends Controller
         }
 
         $subpage = Subpages::findorFail($id);
+
+        $duplicate_slug = Subpages::where('slug', $validated['slug'])->first();
+
+        if ($duplicate_slug) {
+            return response()->json(['message' => 'Duplicate page/slug.'], 400);
+        }
 
         $subpage->title = $validated['title'];
         $subpage->content = $validated['content'];
