@@ -3,6 +3,7 @@ import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
 import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
+import { useFetch } from '../hooks/useFetch.tsx';
 import {AxiosError} from "axios";
 import {conferenceYear, subpageData, adminUser, editorUser, customFile} from "../types.ts";
 import AdminAddModal from '../components/AdminAddModal.tsx';
@@ -47,73 +48,11 @@ export default function AdminPanel() {
     checkAuthorization()
   }, []);
 
-  useEffect (() => {
-    const fetchConferenceYears = async () => {
-    try {
-      const res = await api.get("/conference-years");
-      setConferenceYears(res.data)
-    } catch (e: unknown) {
-      if (e instanceof AxiosError){
-        console.log(e?.response?.statusText);
-      }
-    }
-   }
-   fetchConferenceYears();
-  }, []);
-
-  useEffect(() => {
-    const fetchSubpages = async () => {
-      try {
-        const res = await api.get("/subpages");
-        setSubpages(res.data)
-      } catch (e: unknown) {
-        if (e instanceof AxiosError){
-          console.log(e.response?.statusText);
-        }
-      }
-    }
-    fetchSubpages();
-  }, []);
-
-  useEffect(() => {
-    const fetchAdmins = async () => {
-      try {
-        const res = await api.get("/admins");
-        setAdmins(res.data);
-      } catch (e: unknown) {
-        if (e instanceof AxiosError){
-          console.log(e.response?.statusText);
-        }
-      }
-    }
-    fetchAdmins();
-  }, []);
-
-  useEffect(() => {
-    const fetchEditors = async () => {
-      try {
-        const res = await api.get("/editors");
-        setEditors(res.data);
-      } catch (e: unknown) {
-        if (e instanceof AxiosError){
-          console.log(e.response?.statusText);
-        }
-      }
-    }
-    fetchEditors();
-  }, []);
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const res = await api.get("/uploads");
-        setFiles(res.data)
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    fetchFiles()
-  }, []);
+  useFetch<conferenceYear[]>("/conference-years", setConferenceYears);
+  useFetch<subpageData[]>("/subpages", setSubpages);
+  useFetch<adminUser[]>("/admins", setAdmins);
+  useFetch<editorUser[]>("/editors", setEditors);
+  useFetch<customFile[]>("/uploads", setFiles);
 
   const handleAddYear = async () => {
     try {
