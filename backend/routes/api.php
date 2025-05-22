@@ -18,20 +18,16 @@ Route::get('/subpages/by-id/{id}/edit', [SubPageController::class, "checkEditorP
 Route::get('/subpages/by-year/{year}', [SubPageController::class, "byYear"]);
 Route::get('/subpages/editor', [SubPageController::class, "getEditorSubpages"]);
 Route::get('/editor-year', [EditorController::class, "getYear"]);
-Route::get('/files', [UploadsController::class, "index"]);
-Route::get('/cloud-files', [SupabaseUploadsController::class, 'index']);
-
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-Route::post('/file-upload', [UploadsController::class, "store"]);
-Route::post('/cloud-files', [SupabaseUploadsController::class, 'store']);
 Route::middleware(['auth:api', 'role.check'])->get('/role-check', function (Request $request) {
     return response()->json(["success" => "Accessed admin/editor panel."]);
 });
 Route::delete('/cloud-files/{upload}', [SupabaseUploadsController::class, 'destroy']);
 
 Route::apiResource('conference-years', ConferenceYearController::class);
-Route::apiResource('/subpages', SubPageController::class);
-Route::apiResource('/admins', AdminController::class);
-Route::apiResource('/editors', EditorController::class);
+Route::apiResource('subpages', SubPageController::class);
+Route::apiResource('admins', AdminController::class);
+Route::apiResource('editors', EditorController::class);
+Route::apiResource('uploads', UploadsController::class);

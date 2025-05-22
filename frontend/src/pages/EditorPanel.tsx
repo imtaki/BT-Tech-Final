@@ -4,8 +4,9 @@ import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
-import {subpageData} from "../types.ts";
+import {customFile, subpageData} from "../types.ts";
 import Notification from '../components/Notification.tsx';
+import {DotLoader} from "react-spinners";
 
 export default function EditorPanel() {
   const [activeTab, setActiveTab] = useState('subpages');
@@ -14,6 +15,9 @@ export default function EditorPanel() {
   const [notification, setNotification] = useState({ success: false, message: "", show: false });
   const [subpageTitle, setSubpageTitle] = useState("");
   const [year, setYear] = useState();
+  const [file, setFile] = useState<File | null>();
+  const [files, setFiles] = useState<customFile[]>([]);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const navigate = useNavigate();
 
   const user = getUser();
@@ -65,6 +69,18 @@ export default function EditorPanel() {
     getYear();
   }, []);
 
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const res = await api.get("/uploads");
+        setFiles(res.data)
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchFiles()
+  }, []);
+
   const handleAddSubpage = async () => {
     try {
       const res = await api.post("/subpages", {title: subpageTitle, year: year})
@@ -74,7 +90,7 @@ export default function EditorPanel() {
         message: "Subpage succesfully added!",
         show: true,
       });
-    } catch (e: unknown) {
+    } catch (e) {
       setNotification({
         success: false,
         message: "Something went wrong while adding new Subpage!",
@@ -92,10 +108,60 @@ export default function EditorPanel() {
         message: "Subpage succesfully deleted!",
         show: true,
       });
-    } catch (e: unknown) {
+    } catch (e) {
       setNotification({
         success: false,
         message: "Something went wrong while deleting new Subpage!",
+        show: true,
+      });
+    }
+  }
+
+  const addFile = async () => {
+    if (!file) return
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setUploadLoading(true);
+      await api.post("/uploads/", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }});
+      const files = await api.get("/uploads");
+      setFiles(files.data);
+      setNotification({
+        success: true,
+        message: "The file has been added!",
+        show: true,
+      });
+    } catch (e) {
+      console.error("Failed to add file", e);
+      setNotification({
+        success: false,
+        message: "Failed to add file.",
+        show: true,
+      });
+    } finally {
+      setUploadLoading(false);
+    }
+  }
+
+  const removeFile = async (id: number) => {
+    try {
+      await api.delete(`/uploads/${id}`);
+      setFiles(prev => prev.filter((file: customFile) => file.id != id))
+      setNotification({
+        success: true,
+        message: "The file has been removed!",
+        show: true,
+      });
+    } catch (e) {
+      console.error("Failed to remove file", e);
+      setNotification({
+        success: false,
+        message: "Failed to remove file.",
         show: true,
       });
     }
@@ -128,6 +194,17 @@ export default function EditorPanel() {
               }`}
             >
               Podstránky
+            </Link>
+            <Link
+                to=""
+                onClick={() => setActiveTab('files')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'files'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+            >
+              Súbory
             </Link>
           </nav>
         </div>
@@ -200,6 +277,44 @@ export default function EditorPanel() {
             </table>
           </div>
         </div>
+      )}
+      {activeTab === 'files' && (
+          <div className="bg-white p-4 rounded-lg">
+            <label className="block mb-2 text-xl font-semibold" htmlFor="file_input">
+              Nahraj súbor
+            </label>
+            <input
+                className="block mt-4 w-12/12 lg:w-96 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 file:bg-gray-200 file:p-2 file:border-r-2 file:border-r-gray-50"
+                id="file_input" type="file"
+                accept=".png,.jpeg,.jpg,.doc,.docx,.pdf"
+                onChange={(e) => setFile(e.target.files === null ? null : e.target.files[0])}
+            />
+            <p className="text-xs text-gray-400">Podporvané formáty sú: jpeg, png, jpg, doc, docx, pdf</p>
+            <p className="text-xs text-gray-400">Maximálna veľkosť súboru sú 2MB.</p>
+            <div className="flex">
+              <button onClick={addFile}
+                      className="p-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer rounded-lg text-white mt-4 min-w-24">Nahraj
+              </button>
+              <div className={`mt-6 ml-4 ${uploadLoading ? "block" : "hidden"}`}>
+                <DotLoader size={15} color="#cdcdcd"/>
+              </div>
+            </div>
+            <div className="mt-4 lg:max-w-6/12 max-h-80 overflow-y-auto">
+              <p>Súbory</p>
+              {files.map(file =>
+                  <div key={file.id} className="p-2 border-2 mt-2 border-gray-200 overflow-x-auto">
+                    <p className="">{file.name}</p>
+                    <a href={`${import.meta.env.VITE_URL}storage/${file.path}`}
+                       className="p-1 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-sm mt-2">Stiahnúť</a>
+                    <button
+                        className="p-1 bg-red-500 hover:bg-red-600 hover:cursor-pointer rounded-sm text-white ml-2"
+                        onClick={() => removeFile(file.id)}
+                    >Odstrániť
+                    </button>
+                  </div>
+              )}
+            </div>
+          </div>
       )}
     </div>
   );
