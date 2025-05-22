@@ -8,6 +8,7 @@ export type subpageData = {
     year: number,
     title: string,
     content: string,
+    slug: string
 }
 
 export type adminUser = {
@@ -27,4 +28,13 @@ export type customFile = {
     id: number,
     name: string,
     path: string
+}
+
+export type pageData = {
+    id: number,
+    slug: string,
+    title: string,
+    content: string,
+    is_link: boolean | number,
+    is_index: boolean | number
 }

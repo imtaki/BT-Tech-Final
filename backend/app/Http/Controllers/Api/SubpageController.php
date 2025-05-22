@@ -7,8 +7,6 @@ use App\Models\ConferenceYear;
 use App\Models\Subpages;
 use App\Models\UserConferenceYear;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class SubpageController extends Controller
 {
@@ -26,7 +24,8 @@ class SubpageController extends Controller
 
         $validate = $request->validate([
             'title' => 'required|string',
-            'year' => 'required|integer'
+            'year' => 'required|integer',
+            'slug' => 'required|string'
         ]);
 
         $user = auth('api')->user();
@@ -39,6 +38,7 @@ class SubpageController extends Controller
            'title' => $validate['title'],
            'year' => $validate['year'],
            'last_editor' => $user->id,
+            'slug' => $validate['slug']
         ]);
 
         return response()->json(['message' => 'Subpage created', 'data' => $subpage]);
@@ -47,7 +47,8 @@ class SubpageController extends Controller
     public function update(Request $request, $id) {
         $validated = $request->validate([
             'title' => 'required|string',
-            'content' => 'nullable|string'
+            'content' => 'nullable|string',
+            'slug' => 'required|string'
         ]);
 
         $user = auth('api')->user();
@@ -61,6 +62,7 @@ class SubpageController extends Controller
         $subpage->title = $validated['title'];
         $subpage->content = $validated['content'];
         $subpage->last_editor = $user->id;
+        $subpage->slug = $validated['slug'];
         $subpage->save();
 
         return response()->json(['message' => 'Subpage updated', 'data' => $subpage]);
@@ -118,6 +120,14 @@ class SubpageController extends Controller
         }
 
         return response()->json(['message' => "Allowed"]);
+    }
+
+    public function bySlug($slug) {
+        $subpage = Subpages::where('slug', $slug)->first();
+        if (!$subpage) {
+            return response()->json(['message' => 'Subpage not found.'], 404);
+        }
+        return response()->json($subpage);
     }
     //
 }

@@ -1,20 +1,23 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\ConferenceYearController;
+use App\Http\Controllers\Api\EditorController;
+use App\Http\Controllers\Api\PagesController;
+use App\Http\Controllers\Api\SubPageController;
+use App\Http\Controllers\Api\SupabaseUploadsController;
+use App\Http\Controllers\Api\UploadsController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Api\AdminController;
-use App\Http\Controllers\Api\EditorController;
-use App\Http\Controllers\Api\SubPageController;
-use App\Http\Controllers\Api\ConferenceYearController;
-use App\Http\Controllers\Api\UploadsController;
-use App\Http\Controllers\Api\SupabaseUploadsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+Route::get('/pages/by-slug/{slug}', [PagesController::class, 'getPageBySlug']);
 Route::get('/subpages/by-id/{id}', [SubPageController::class, "show"]);
-Route::get('/subpages/by-id/{id}/edit', [SubPageController::class, "checkEditorPermission"]);
+Route::get('/subpages/by-slug/{slug}', [SubPageController::class, "bySlug"]);
+Route::get('/subpages/by-slug/{id}/edit', [SubPageController::class, "checkEditorPermission"]);
 Route::get('/subpages/by-year/{year}', [SubPageController::class, "byYear"]);
 Route::get('/subpages/editor', [SubPageController::class, "getEditorSubpages"]);
 Route::get('/editor-year', [EditorController::class, "getYear"]);
@@ -31,3 +34,4 @@ Route::apiResource('subpages', SubPageController::class);
 Route::apiResource('admins', AdminController::class);
 Route::apiResource('editors', EditorController::class);
 Route::apiResource('uploads', UploadsController::class);
+Route::apiResource("pages", PagesController::class);

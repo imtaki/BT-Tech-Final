@@ -83,7 +83,8 @@ export default function EditorPanel() {
 
   const handleAddSubpage = async () => {
     try {
-      const res = await api.post("/subpages", {title: subpageTitle, year: year})
+      const created_slug = convertToSlug(subpageTitle)
+      const res = await api.post("/subpages", {title: subpageTitle, slug:created_slug, year: year})
       setSubpages(prev => [res.data.data, ...prev].sort((a: subpageData, b: subpageData) => b.year - a.year))
       setNotification({
         success: true,
@@ -165,6 +166,12 @@ export default function EditorPanel() {
         show: true,
       });
     }
+  }
+
+  function convertToSlug(Text: string) {
+    return Text.toLowerCase()
+        .replace(/ /g, "-")
+        .replace(/[^\w-]+/g, "");
   }
 
   if(!authorized) {
@@ -260,7 +267,7 @@ export default function EditorPanel() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
-                        <Link to={{pathname: "/subpage/edit/" + subpage.id}}>
+                        <Link to={{pathname: "/subpage/edit/" + subpage.slug}}>
                           <button className="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
                             <FaEdit className="mr-1"/> Editovať
                           </button>

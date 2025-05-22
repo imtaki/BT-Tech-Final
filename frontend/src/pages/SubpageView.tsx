@@ -7,15 +7,15 @@ import DOMPurify from "dompurify";
 import Skeleton from "react-loading-skeleton";
 
 const SubpageView = () => {
-    const {year, id} = useParams();
+    const {slug, id} = useParams();
     const [loading, setLoading] = useState(true);
     const [subpage, setSubpage] = useState<subpageData>();
 
     useEffect(() => {
         const fetchSubpageData = async () => {
             try {
-                const res = await api.get(`/subpages/by-id/${id}`);
-                if (res.data.year !== Number(year)) {
+                const res = await api.get(`/subpages/by-slug/${id}`);
+                if (res.data.year !== Number(slug)) {
                     return
                 }
                 setSubpage(res.data);
@@ -28,7 +28,7 @@ const SubpageView = () => {
             }
         }
         fetchSubpageData()
-    }, [id]);
+    }, [slug]);
 
     if (loading) {
         return (

@@ -1,11 +1,10 @@
 import {useEffect, useState} from 'react';
 import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
-import { uploadFileToSupabaseAndLaravel } from '../utils/FileUpload.ts';
 import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
 import {AxiosError} from "axios";
-import {conferenceYear, subpageData, adminUser, editorUser, customFile} from "../types.ts";
+import {conferenceYear, subpageData, adminUser, editorUser, customFile, pageData} from "../types.ts";
 import AdminAddModal from '../components/AdminAddModal.tsx';
 import EditorAddModal from '../components/EditorAddModal.tsx';
 import Notification from '../components/Notification.tsx';
@@ -16,6 +15,11 @@ export default function AdminPanel() {
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [conferenceYears, setConferenceYears] = useState<conferenceYear[]>([]);
   const [newYear, setNewYear] = useState("");
+  const [pages, setPages] = useState<pageData[]>([]);
+  const [pageTitle, setPageTitle] = useState("");
+  const [pageSlug, setPageSlug] = useState("");
+  const [pageIsLink, setPageIsLink] = useState(false);
+  const [pageIsIndex, setPageIsIndex] = useState(false);
   const [subpages, setSubpages] = useState<subpageData[]>([]);
   const [subpageTitle, setSubpageTitle] = useState("");
   const [subpageYear, setSubpageYear] = useState(new Date().getFullYear().toString());
@@ -113,7 +117,19 @@ export default function AdminPanel() {
         console.error(e);
       }
     }
-    fetchFiles()
+    fetchFiles();
+  }, []);
+
+  useEffect(() => {
+    const fetchPages = async () => {
+      try {
+        const res = await api.get("/pages");
+        setPages(res.data)
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchPages();
   }, []);
 
   const handleAddYear = async () => {
@@ -157,7 +173,8 @@ export default function AdminPanel() {
 
   const handleAddSubpage = async () => {
     try {
-      const res = await api.post("/subpages", {title: subpageTitle, year: Number(subpageYear)})
+      const created_slug = convertToSlug(subpageTitle)
+      const res = await api.post("/subpages", {title: subpageTitle, slug: created_slug, year: Number(subpageYear)})
       setSubpages(prev => [res.data.data, ...prev].sort((a: subpageData, b: subpageData) => b.year - a.year))
       setNotification({
         success: true,
@@ -345,6 +362,53 @@ export default function AdminPanel() {
       }
   }
 
+  const handleAddPage = async () => {
+    try {
+      const converted_slug = convertToSlug(String(pageSlug))
+      await api.post("/pages", {title: pageTitle, slug: converted_slug, is_index: pageIsIndex, is_link: pageIsLink});
+      const res = await api.get("/pages");
+      setPages(res.data);
+      setNotification({
+        success: true,
+        message: "Page has been added.",
+        show: true,
+      });
+    } catch (e: unknown) {
+      if (e instanceof AxiosError) {
+        setNotification({
+          success: false,
+          message: e.response?.data.message ?? "Error whilst adding the page",
+          show: true,
+        });
+      }
+    }
+  }
+
+  const handleDeletePage = async (id: number) => {
+    try {
+      await api.delete(`/pages/${id}`);
+      setPages(prev => prev.filter(page => page.id !== id));
+      setNotification({
+        success: true,
+        message: "Page has been removed!",
+        show: true,
+      });
+    } catch (e) {
+      console.error(e);
+      setNotification({
+        success: false,
+        message: "Failed to remove page.",
+        show: true,
+      });
+    }
+  }
+
+  function convertToSlug(Text: string) {
+    return Text.toLowerCase()
+        .replace(/ /g, "-")
+        .replace(/[^\w-]+/g, "");
+  }
+
   if(!authorized) {
     return null
   }
@@ -394,6 +458,17 @@ export default function AdminPanel() {
               }`}
             >
               Administrátori
+            </Link>
+            <Link
+                to=""
+                onClick={() => setActiveTab('pages')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'pages'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+            >
+              Stránky
             </Link>
             <Link
               to=""
@@ -524,6 +599,83 @@ export default function AdminPanel() {
         </div>
       )}
 
+      {activeTab === 'pages' && (
+          <div className="bg-white shadow rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Stránky</h2>
+            <div className="space-y-2 mb-4">
+              <input
+                  type="text"
+                  placeholder="Názov stránky"
+                  className="w-full border px-3 py-2 rounded"
+                  onChange={(e) => setPageTitle(e.target.value)}
+              />
+              <input
+                  type="text"
+                  placeholder="Slug stránky"
+                  className="w-full border px-3 py-2 rounded"
+                  onChange={(e) => setPageSlug(e.target.value)}
+              />
+              <div className="flex">
+                <input
+                    type="checkbox"
+                    className="border px-3 py-2 rounded"
+                    onChange={() => setPageIsLink(!pageIsLink)}
+                /><p className="ml-2">Stránka je v menu</p>
+              </div>
+              <div className="flex">
+                <input
+                    type="checkbox"
+                    aria-label="Stránka je index"
+                    className="border px-3 py-2 rounded"
+                    onChange={() => setPageIsIndex(!pageIsIndex)}
+                /><p className="ml-2">Stránka je hlavná</p>
+              </div>
+              <button onClick={handleAddPage}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r flex items-center">
+                <FaPlus className="mr-1"/> Pridať stránku
+              </button>
+            </div>
+            <div className="w-full overflow-x-scroll lg:overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200 border">
+                <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stránka
+                  </th>
+                  <th scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Akcie
+                  </th>
+                </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                {pages.map((page: pageData) => (
+                    <tr key={page.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {page.title}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end space-x-2">
+                          <Link to={{pathname: "/pages/edit/" + page.slug}}>
+                            <button className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center">
+                              <FaEdit className="mr-1"/> Editovať
+                            </button>
+                          </Link>
+                          <button onClick={() => handleDeletePage(page.id)}
+                                  className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded flex items-center">
+                            <FaMinus className="mr-1"/> Odstrániť
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+      )}
+
       {activeTab === 'subpages' && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Podstránky</h2>
@@ -575,7 +727,7 @@ export default function AdminPanel() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
-                        <Link to={{pathname: "/subpage/edit/" + subpage.id}}>
+                        <Link to={{pathname: "/subpage/edit/" + subpage.slug}}>
                           <button className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center">
                             <FaEdit className="mr-1"/> Editovať
                           </button>

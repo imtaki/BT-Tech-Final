@@ -4,9 +4,6 @@ import './index.css'
 import 'react-loading-skeleton/dist/skeleton.css';
 import { BrowserRouter, Route, Routes} from 'react-router'
 import Login from './pages/Login';
-import About from './pages/About';
-import Research from './pages/Research';
-import Studies from './pages/Studies';
 import AdminLayout from './components/AdminLayout';
 import AdminPanel from './pages/AdminPanel';
 import NotFound from './pages/NotFound';
@@ -14,8 +11,8 @@ import EditSubpage from "./pages/EditSubpage.tsx";
 import EditLayout from "./components/EditLayout.tsx";
 import EditorPanel from "./pages/EditorPanel.tsx";
 import SubpageView from "./pages/SubpageView.tsx";
-import YearView from "./pages/YearView.tsx";
-
+import DynamicPageView from "./pages/DynamicPageView.tsx";
+import EditPage from "./pages/EditPage.tsx";
 
 export default function App() {
   return (
@@ -24,11 +21,8 @@ export default function App() {
         <Routes >
             <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
-                <Route path='/about' element={<About />} />
-                <Route path='/research' element={<Research />} />
-                <Route path='/studies' element={<Studies />} />
-                <Route path='/:year/:id' element={<SubpageView />} />
-                <Route path='/:year' element={<YearView/>}/>
+                <Route path='/:slug/:id' element={<SubpageView />} />
+                <Route path='/:slug' element={<DynamicPageView/>}/>
             </Route>
             
             <Route path='/login' element={<Login />} />
@@ -43,6 +37,10 @@ export default function App() {
 
             <Route path="/subpage/edit/" element={<EditLayout/>}>
                 <Route path="/subpage/edit/:id" element={<EditSubpage />}/>
+            </Route>
+
+            <Route path="/pages/edit/" element={<EditLayout/>}>
+                <Route path="/pages/edit/:slug" element={<EditPage />}/>
             </Route>
             
             <Route path='/not-found' element={<NotFound />} />
