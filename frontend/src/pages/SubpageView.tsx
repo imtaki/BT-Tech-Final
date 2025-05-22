@@ -48,8 +48,8 @@ const SubpageView = () => {
     }
 
     return (
-        <div className="prose-lg lg:px-48">
-            <h1 className="text-center">{subpage.title}</h1>
+        <div className="prose-lg">
+            <h2 className="font-bold">{subpage.title}</h2>
             <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(subpage.content)}}
                  className="mt-4"></div>
         </div>

@@ -53,7 +53,6 @@ class UploadsController extends Controller
      */
     public function show(Upload $upload)
     {
-        //
     }
 
     /**
