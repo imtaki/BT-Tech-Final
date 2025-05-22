@@ -19,11 +19,7 @@ export default function Home() {
     }, []);
 
     if (!content) {
-        return (
-            <div className="w-full">
-                <Skeleton baseColor="#e8e8e8" highlightColor="#cdcdcd" height={400}/>
-            </div>
-        );
+        return null;
     }
 
     return (
