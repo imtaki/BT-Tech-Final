@@ -7,9 +7,10 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { GiHamburgerMenu } from "react-icons/gi";
 import {useEffect, useState} from "react";
 import api from "../utils/axios.ts";
+import {pageData} from "../types.ts";
 
 export default function NavBar() {
-    const [navItems, setNavItems] = useState([]);
+    const [navItems, setNavItems] = useState<pageData[]>([]);
     const loggedIn = isLoggedIn();
     const role = getRole();
 
@@ -60,7 +61,7 @@ export default function NavBar() {
                     {navItems.filter(prev => prev.is_link).map((item) => (
                         <li key={item.id}>
                             <Link
-                                to={item.is_index ? "/" : item.slug}
+                                to={item.is_index ? "/" : "/" + item.slug}
                                 className={
                                     currentPath === item.slug
                                         ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
@@ -115,7 +116,7 @@ export default function NavBar() {
                 {navItems.filter(prev => prev.is_link).map((item) => (
                     <li key={item.id} className="p-2">
                         <Link
-                            to={item.is_index ? "/" : item.slug}
+                            to={item.is_index ? "/" : "/" + item.slug}
                             className={
                                 currentPath === item.slug
                                     ? "text-orange-400 font-semibold text-lg border-b-2 border-orange-500 pb-1"
