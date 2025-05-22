@@ -54,22 +54,12 @@ export default function AdminPanel() {
     checkAuthorization()
   }, []);
 
-  useEffect(() => {
-    const fetchPages = async () => {
-      try {
-        const res = await api.get("/pages");
-        setPages(res.data)
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    fetchPages();
-  }, []);
   useFetch<conferenceYear[]>("/conference-years", setConferenceYears);
   useFetch<subpageData[]>("/subpages", setSubpages);
   useFetch<adminUser[]>("/admins", setAdmins);
   useFetch<editorUser[]>("/editors", setEditors);
   useFetch<customFile[]>("/uploads", setFiles);
+  useFetch<pageData[]>("/pages", setPages);
 
   const handleAddYear = async () => {
     try {

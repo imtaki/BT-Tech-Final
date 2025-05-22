@@ -62,7 +62,7 @@ return (
                 <td className="px-6 py-4 whitespace-nowrap">{subpage.title}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
-                    <Link to={`/subpage/edit/${subpage.id}`}>
+                    <Link to={`/subpage/edit/${subpage.slug}`}>
                       <button className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center">
                         <FaEdit className="mr-1" /> Editovať
                       </button>
