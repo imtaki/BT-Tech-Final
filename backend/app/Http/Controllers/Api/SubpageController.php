@@ -65,9 +65,9 @@ class SubpageController extends Controller
 
         $subpage = Subpages::findorFail($id);
 
-        $duplicate_slug = Subpages::where('slug', $validated['slug'])->first();
+        $duplicate_slug = Subpages::where('slug', $validated['slug'])->where('id', '!=', $subpage->id)->count();
 
-        if ($duplicate_slug) {
+        if ($duplicate_slug > 0) {
             return response()->json(['message' => 'Duplicate page/slug.'], 400);
         }
 

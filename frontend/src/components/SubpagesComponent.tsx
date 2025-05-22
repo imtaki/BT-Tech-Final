@@ -9,6 +9,7 @@ export const Subpages = ({
   handleAddSubpage,
   handleDeleteSubpage
 }) => {
+
 return (
     <div className="bg-white shadow rounded-lg p-6 mb-6">
       <h2 className="text-xl font-semibold mb-4">Podstránky</h2>
@@ -32,7 +33,7 @@ return (
             ))}
           </select>
           <button
-            onClick={() => handleAddSubpage}
+            onClick={handleAddSubpage}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r flex items-center"
           >
             <FaPlus className="mr-1" /> Pridať podstránku

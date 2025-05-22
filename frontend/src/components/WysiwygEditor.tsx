@@ -36,8 +36,8 @@ export default function WysiwygEditor(props : {id: number, title: string, slug: 
 
     const handleSavePage = async () => {
         try {
-            const fixed_slug = convertToSlug(slug)
-            await api.patch(`/pages/${props.id}`, {title, slug: fixed_slug, content: DOMPurify.sanitize(editorRef.current.getContent()), is_index: isIndex, is_link: isLink});
+            const generated_slug = convertToSlug(title);
+            await api.patch(`/pages/${props.id}`, {title, slug: generated_slug, content: DOMPurify.sanitize(editorRef.current.getContent()), is_index: isIndex, is_link: isLink});
             setNotification({
                 success: true,
                 message: "Content saved successfully!",
@@ -55,7 +55,7 @@ export default function WysiwygEditor(props : {id: number, title: string, slug: 
     }
     const handleSaveSubPage = async () => {
         try {
-            const title_slug = convertToSlug(title)
+            const title_slug = convertToSlug(title);
             await api.patch(`/subpages/${props.id}`, {title, slug: title_slug, content: DOMPurify.sanitize(editorRef.current.getContent())});
             setNotification({
               success: true,

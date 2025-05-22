@@ -99,11 +99,10 @@ export default function AdminPanel() {
       });
     }
   }
-
   const handleAddSubpage = async () => {
     try {
       const created_slug = convertToSlug(subpageTitle)
-      const res = await api.post("/subpages", {title: subpageTitle, slug: created_slug, year: Number(subpageYear)})
+      const res = await api.post("/subpages", {title: subpageTitle, slug: created_slug, year: subpageYear})
       setSubpages(prev => [res.data.data, ...prev].sort((a: subpageData, b: subpageData) => b.year - a.year))
       setNotification({
         success: true,
@@ -119,7 +118,6 @@ export default function AdminPanel() {
       });
     }
   }
-
   const handleDeleteSubpage = async (subpage: number) => {
     try {
       await api.delete(`/subpages/${subpage}`)
