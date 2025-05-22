@@ -3,12 +3,14 @@ import { FaPlus, FaMinus, FaEdit } from 'react-icons/fa';
 import {Link, useNavigate} from 'react-router';
 import { getUser } from '../utils/auth';
 import api from "../utils/axios.ts";
+import { useFetch } from '../hooks/useFetch.tsx';
 import {AxiosError} from "axios";
 import {conferenceYear, subpageData, adminUser, editorUser, customFile, pageData} from "../types.ts";
 import AdminAddModal from '../components/AdminAddModal.tsx';
 import EditorAddModal from '../components/EditorAddModal.tsx';
 import Notification from '../components/Notification.tsx';
-import {DotLoader} from "react-spinners";
+import DragDropFileUpload from '../components/DragAndDrop.tsx';
+import { Subpages } from '../components/SubpagesComponent.tsx';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('years');
@@ -52,74 +54,6 @@ export default function AdminPanel() {
     checkAuthorization()
   }, []);
 
-  useEffect (() => {
-    const fetchConferenceYears = async () => {
-    try {
-      const res = await api.get("/conference-years");
-      setConferenceYears(res.data)
-    } catch (e: unknown) {
-      if (e instanceof AxiosError){
-        console.log(e?.response?.statusText);
-      }
-    }
-   }
-   fetchConferenceYears();
-  }, []);
-
-  useEffect(() => {
-    const fetchSubpages = async () => {
-      try {
-        const res = await api.get("/subpages");
-        setSubpages(res.data)
-      } catch (e: unknown) {
-        if (e instanceof AxiosError){
-          console.log(e.response?.statusText);
-        }
-      }
-    }
-    fetchSubpages();
-  }, []);
-
-  useEffect(() => {
-    const fetchAdmins = async () => {
-      try {
-        const res = await api.get("/admins");
-        setAdmins(res.data);
-      } catch (e: unknown) {
-        if (e instanceof AxiosError){
-          console.log(e.response?.statusText);
-        }
-      }
-    }
-    fetchAdmins();
-  }, []);
-
-  useEffect(() => {
-    const fetchEditors = async () => {
-      try {
-        const res = await api.get("/editors");
-        setEditors(res.data);
-      } catch (e: unknown) {
-        if (e instanceof AxiosError){
-          console.log(e.response?.statusText);
-        }
-      }
-    }
-    fetchEditors();
-  }, []);
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const res = await api.get("/uploads");
-        setFiles(res.data)
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    fetchFiles();
-  }, []);
-
   useEffect(() => {
     const fetchPages = async () => {
       try {
@@ -131,6 +65,11 @@ export default function AdminPanel() {
     }
     fetchPages();
   }, []);
+  useFetch<conferenceYear[]>("/conference-years", setConferenceYears);
+  useFetch<subpageData[]>("/subpages", setSubpages);
+  useFetch<adminUser[]>("/admins", setAdmins);
+  useFetch<editorUser[]>("/editors", setEditors);
+  useFetch<customFile[]>("/uploads", setFiles);
 
   const handleAddYear = async () => {
     try {
@@ -587,14 +526,22 @@ export default function AdminPanel() {
           </div>
 
           <ul className="divide-y divide-gray-200">
-            {admins.map((adminObj) => (
-              <li key={adminObj.id} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
-                <span className="font-medium">{adminObj.email}</span>
-                <button onClick={() => handleDeleteAdmin(adminObj.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center">
-                  <FaMinus className="mr-1" /> Odstrániť
-                </button>
-              </li>
-            ))}
+            {admins.map((adminObj) => {
+               const isCurrentAdmin = user && adminObj.id === user.id;
+                return (
+                  <li key={adminObj.id} className="py-3 flex flex-col gap-2 lg:flex-row items-start justify-between">
+                    <span className="font-medium">{adminObj.email}</span>
+                    <button
+                      onClick={() => handleDeleteAdmin(adminObj.id)}
+                      disabled={isCurrentAdmin}
+                      className={`${isCurrentAdmin ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'
+                                } text-white px-3 py-1 rounded flex items-center`} >
+                      <FaMinus className="mr-1" />
+                        {isCurrentAdmin ? 'Nemôžete sa odstrániť' : 'Odstrániť'}
+                     </button>
+                  </li>
+                  );
+              })}
           </ul>
         </div>
       )}
@@ -677,111 +624,24 @@ export default function AdminPanel() {
       )}
 
       {activeTab === 'subpages' && (
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Podstránky</h2>
-
-          <div className="space-y-2 mb-4">
-            <input
-              type="text"
-              placeholder="Názov podstránky"
-              className="w-full border px-3 py-2 rounded"
-              onChange={(e) => setSubpageTitle(e.target.value)}
-            />
-            <div className="flex flex-col lg:flex-row gap-2">
-              <select className="flex-grow border px-3 py-2 rounded-l" onChange={(e) => setSubpageYear(e.target.value)}>
-                {conferenceYears.map((yearObj: conferenceYear) => (
-                  <option key={yearObj.id} value={yearObj.year}>{yearObj.year}</option>
-                ))}
-              </select>
-              <button onClick={handleAddSubpage} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r flex items-center">
-                <FaPlus className="mr-1" /> Pridať podstránku
-              </button>
-            </div>
-          </div>
-          <div className="w-full overflow-x-scroll lg:overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200 border">
-              <thead className="bg-gray-50">
-              <tr>
-                <th scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rok
-                </th>
-                <th scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Podstránka
-                </th>
-                <th scope="col"
-                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Akcie
-                </th>
-              </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-              {subpages.map((subpage: subpageData) => (
-                  <tr key={subpage.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {subpage.year}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {subpage.title}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end space-x-2">
-                        <Link to={{pathname: "/subpage/edit/" + subpage.slug}}>
-                          <button className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center">
-                            <FaEdit className="mr-1"/> Editovať
-                          </button>
-                        </Link>
-                        <button onClick={() => handleDeleteSubpage(subpage.id)}
-                                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded flex items-center">
-                          <FaMinus className="mr-1"/> Odstrániť
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-              ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            <Subpages subpages={subpages}
+              conferenceYears={conferenceYears}
+              setSubpageTitle={setSubpageTitle}
+              setSubpageYear={setSubpageYear}
+              handleAddSubpage={handleAddSubpage}
+              handleDeleteSubpage={handleDeleteSubpage}/>
       )}
 
       {activeTab === 'files' && (
-          <div className="bg-white p-4 rounded-lg">
-            <label className="block mb-2 text-xl font-semibold" htmlFor="file_input">
-              Nahraj súbor
-            </label>
-            <input
-                className="block mt-4 w-12/12 lg:w-96 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 file:bg-gray-200 file:p-2 file:border-r-2 file:border-r-gray-50"
-                id="file_input" type="file"
-                accept=".png,.jpeg,.jpg,.doc,.docx,.pdf"
-                onChange={(e) => setFile(e.target.files === null ? null : e.target.files[0])}
-            />
-            <p className="text-xs text-gray-400">Podporvané formáty sú: jpeg, png, jpg, doc, docx, pdf</p>
-            <p className="text-xs text-gray-400">Maximálna veľkosť súboru sú 2MB.</p>
-            <div className="flex">
-              <button onClick={addFile}
-                      className="p-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer rounded-lg text-white mt-4 min-w-24">Nahraj
-              </button>
-              <div className={`mt-6 ml-4 ${uploadLoading ? "block" : "hidden"}`}>
-                <DotLoader size={15} color="#cdcdcd"/>
-              </div>
-            </div>
-            <div className="mt-4 lg:max-w-6/12 max-h-80 overflow-y-auto">
-              <p>Súbory</p>
-              {files.map(file =>
-                  <div key={file.id} className="p-2 border-2 mt-2 border-gray-200 overflow-x-auto">
-                    <p className="">{file.name}</p>
-                    <a href={`${import.meta.env.VITE_URL}storage/${file.path}`}
-                       className="p-1 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-sm mt-2">Stiahnúť</a>
-                    <button
-                        className="p-1 bg-red-500 hover:bg-red-600 hover:cursor-pointer rounded-sm text-white ml-2"
-                        onClick={() => removeFile(file.id)}
-                    >Odstrániť
-                    </button>
-                  </div>
-              )}
-            </div>
+          <div className="shadow rounded-lg mb-6">
+              <DragDropFileUpload 
+                file={file}
+                setFile={setFile}
+                files={files}
+                uploadLoading={uploadLoading}
+                onUpload={addFile}
+                onRemove={removeFile}
+              />
           </div>
       )}
     </div>
