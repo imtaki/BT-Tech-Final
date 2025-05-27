@@ -7,8 +7,8 @@ export function getUser() {
 export const getRole = () => {
     const user = getUser();
     return user?.role || null;
-  };
+};
   
-  export const isLoggedIn = () => {
+export const isLoggedIn = () => {
     return !!localStorage.getItem('token');
-  };
+};

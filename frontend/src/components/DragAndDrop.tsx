@@ -3,17 +3,66 @@ import { FaUpload, FaFile, FaTimes, FaDownload } from 'react-icons/fa';
 import { DotLoader } from 'react-spinners';
 import { customFile } from '../types';
 import Notification from './Notification';
-const DragDropFileUpload = ({ 
-  file, 
-  setFile, 
-  files, 
-  uploadLoading, 
-  onUpload, 
-  onRemove 
-}) => {
+import {useFetch} from "../hooks/useFetch.tsx";
+import api from "../utils/axios.ts";
+const DragDropFileUpload = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [notification, setNotification] = useState({ success: false, message: "", show: false });
+  const [file, setFile] = useState<File | null>();
+  const [files, setFiles] = useState<customFile[]>([]);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const fileInputRef = useRef(null);
+
+  useFetch<customFile[]>("/uploads", setFiles);
+  const addFile = async () => {
+    if (!file) return
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setUploadLoading(true);
+      await api.post("/uploads/", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }});
+      const files = await api.get("/uploads");
+      setFiles(files.data);
+      setNotification({
+        success: true,
+        message: "The file has been added!",
+        show: true,
+      });
+    } catch (e) {
+      console.error("Failed to add file", e);
+      setNotification({
+        success: false,
+        message: "Failed to add file.",
+        show: true,
+      });
+    } finally {
+      setUploadLoading(false);
+    }
+  }
+
+  const removeFile = async (id: number) => {
+    try {
+      await api.delete(`/uploads/${id}`);
+      setFiles(prev => prev.filter((file: customFile) => file.id != id))
+      setNotification({
+        success: true,
+        message: "The file has been removed!",
+        show: true,
+      });
+    } catch (e) {
+      console.error("Failed to remove file", e);
+      setNotification({
+        success: false,
+        message: "Failed to remove file.",
+        show: true,
+      });
+    }
+  }
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -55,7 +104,7 @@ const DragDropFileUpload = ({
     }
   };
 
-  const validateFile = (file) => {
+  const validateFile = (file: customFile) => {
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf', 
                          'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!allowedTypes.includes(file.type)) {
@@ -72,7 +121,7 @@ const DragDropFileUpload = ({
       return;
     }
     
-    await onUpload();
+    await addFile();
     setFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -89,10 +138,13 @@ const DragDropFileUpload = ({
 
   return (
     <>
-    <Notification
-        success={notification.success}
-        message={notification.message}
-        onClose={() => setNotification((prev) => ({ ...prev, show: false }))}/>
+      {notification.show && (
+          <Notification
+              success={notification.success}
+              message={notification.message}
+              onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
+          />
+      )}
     <div className="bg-white p-6 rounded-lg shadow-sm">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Nahraj súbor</h2>
       
@@ -221,7 +273,7 @@ const DragDropFileUpload = ({
                     <span>Stiahnúť</span>
                   </a>
                   <button
-                    onClick={() => onRemove(file.id)}
+                    onClick={() => removeFile(file.id)}
                     className="flex items-center space-x-1 px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm transition-colors duration-200"
                   >
                     <FaTimes className="w-4 h-4" />
