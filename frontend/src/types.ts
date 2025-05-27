@@ -28,6 +28,7 @@ export type customFile = {
     id: number,
     name: string,
     path: string
+    type: string
 }
 
 export type pageData = {
