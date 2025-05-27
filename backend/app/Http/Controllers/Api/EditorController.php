@@ -6,7 +6,6 @@ use App\Models\ConferenceYear;
 use App\Models\User;
 use App\Models\UserConferenceYear;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 class EditorController extends Controller
