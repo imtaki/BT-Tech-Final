@@ -36,8 +36,7 @@ export default function WysiwygEditor(props : {id: number, title: string, slug: 
 
     const handleSavePage = async () => {
         try {
-            const generated_slug = convertToSlug(title);
-            await api.patch(`/pages/${props.id}`, {title, slug: generated_slug, content: DOMPurify.sanitize(editorRef.current.getContent()), is_index: isIndex, is_link: isLink});
+            await api.patch(`/pages/${props.id}`, {title, slug: slug, content: DOMPurify.sanitize(editorRef.current.getContent()), is_index: isIndex, is_link: isLink});
             setNotification({
                 success: true,
                 message: "Content saved successfully!",

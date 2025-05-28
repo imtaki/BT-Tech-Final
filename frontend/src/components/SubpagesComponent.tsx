@@ -21,8 +21,8 @@ export const Subpages = (props: {role : string}) => {
       const getYear = async () => {
         try {
           const res = await api.get("/editor-year");
-          setYear(res.data.year);
-          setSubpageYear(res.data.year);
+          setYear(res.data.message.year);
+          setSubpageYear(res.data.message.year);
         } catch (e: unknown) {
           if (e instanceof AxiosError) {
             console.log(e.response?.data.error);

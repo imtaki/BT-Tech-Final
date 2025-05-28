@@ -3,97 +3,46 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PageRequest;
 use App\Models\Pages;
+use App\Services\PagesService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class PagesController extends Controller
 {
+    protected PagesService $pagesService;
+
+    public function __construct(PagesService $pagesService)
+    {
+        $this->pagesService = $pagesService;
+    }
+
     public function index()
     {
         return response()->json(Pages::get());
     }
 
-    public function store(Request $request) {
-
-        $validated = $request->validate([
-            'title' => 'required|string',
-            'slug' => 'required|string',
-            'is_index' => 'required|boolean',
-            'is_link' => 'required|boolean',
-        ]);
-
-        if ($validated['is_index']) {
-            $index_page = Pages::where("is_index", 1)->count();
-            if ($index_page > 0) {
-                return response()->json(['message' => 'Index page already exists'], 403);
-            }
+    public function store(PageRequest $request) {
+        Gate::authorize('create', Pages::class);
+        $data = $this->pagesService->createNewPage($request);
+        if (!$data["success"]) {
+            return response()->json(["message" => $data["message"]], 409);
         }
-
-        $slugExists = Pages::where('slug', $validated['slug'])->count();
-        $titleExists = Pages::where('title', $validated['title'])->count();
-
-        if ($slugExists > 0 || $titleExists > 0) {
-            return response()->json(['message' => 'Page already exists'], 403);
-        }
-
-        $user = auth('api')->user();
-
-        if (!$user || $user->role != "admin") {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $page = Pages::create([
-            'title' => $validated['title'],
-            'slug' => $validated['slug'],
-            'last_editor' => $user->id,
-            'is_link' => $validated['is_link'],
-            'is_index' => $validated['is_index'],
-        ]);
-
-        return response()->json([$page]);
+        return response()->json([$data["page"]]);
     }
 
-    public function update(Request $request, $id) {
-        $validated = $request->validate([
-            'title' => 'required|string',
-            'slug' => 'required|string',
-            'content' => 'nullable|string',
-            'is_index' => 'required|boolean',
-            'is_link' => 'required|boolean',
-        ]);
-
-        if ($validated['is_index']) {
-            $index_page = Pages::where("is_index", 1)->where("id", "!=", $id)->count();
-            if ($index_page > 0) {
-                return response()->json(['message' => 'Index page already exists'], 403);
-            }
+    public function update(PageRequest $request, $id) {
+        Gate::authorize('update', Pages::class);
+        $data = $this->pagesService->updatePage($request, $id);
+        if (!$data["success"]) {
+            return response()->json(["message" => $data["message"]], 409);
         }
-
-        $slugExists = Pages::where('slug', $validated['slug'])->where('id', '!=', $id)->count();
-        $titleExists = Pages::where('title', $validated['title'])->where('id', '!=', $id)->count();
-
-        if ($slugExists > 0 || $titleExists > 0) {
-            return response()->json(['message' => 'Page already exists'], 403);
-        }
-
-        $user = auth('api')->user();
-        if (!$user || $user->role != "admin") {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $page = Pages::findorFail($id);
-        $page->title = $validated['title'];
-        $page->content = $validated['content'];
-        $page->slug = $validated['slug'];
-        $page->last_editor = $user->id;
-        $page->is_index = $validated['is_index'];
-        $page->is_link = $validated['is_link'];
-        $page->save();
-
-        return response()->json(['message' => 'Page updated']);
+        return response()->json([$data["page"]]);
     }
 
     public function destroy(Pages $page) {
+        Gate::authorize('delete', $page);
         $page->delete();
         return response()->json(['message' => 'Page deleted']);
     }
