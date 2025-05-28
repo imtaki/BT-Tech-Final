@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ConferenceYearRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\ConferenceYear;
+use Illuminate\Support\Facades\Gate;
 
 class ConferenceYearController extends Controller
 {
@@ -13,43 +16,16 @@ class ConferenceYearController extends Controller
         return response()->json(ConferenceYear::orderByDesc('year')->get());
     }
 
-    public function store(Request $request)
+    public function store(ConferenceYearRequest $request)
     {
-        $request->validate([
-            'year' => 'required|digits:4|integer|unique:conference_years,year',
-        ]);
-
-        $user = auth('api')->user();
-        if (!$user || $user->role != "admin") {
-            return response()->json(["message" => "Unauthorized"], 401);
-        }
-
+        Gate::authorize('create', User::class);
         $year = ConferenceYear::create($request->only('year'));
         return response()->json($year, 201);
     }
 
-    public function show(ConferenceYear $conferenceYear)
-    {
-        return response()->json($conferenceYear);
-    }
-
-    public function update(Request $request, ConferenceYear $conferenceYear)
-    {
-        $request->validate([
-            'year' => 'required|digits:4|integer|unique:conference_years,year,' . $conferenceYear->id,
-        ]);
-
-        $conferenceYear->update($request->only('year'));
-        return response()->json($conferenceYear);
-    }
-
     public function destroy(ConferenceYear $conferenceYear)
     {
-        $user = auth('api')->user();
-        if (!$user || $user->role != "admin") {
-            return response()->json(["message" => "Unauthorized"], 401);
-        }
-
+        Gate::authorize('removeConferenceYear', User::class);
         $conferenceYear->delete();
         return response()->json(null, 204);
     }

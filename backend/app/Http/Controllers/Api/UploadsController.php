@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Upload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class UploadsController extends Controller
@@ -14,6 +15,7 @@ class UploadsController extends Controller
      */
     public function index()
     {
+        Gate::authorize('viewAny', Upload::class);
         $uploads = Upload::all();
         return response()->json($uploads);
     }
@@ -31,6 +33,7 @@ class UploadsController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('create', Upload::class);
         $validated = $request->validate([
             'file' => 'required|file|mimes:jpeg,png,jpg,doc,docx,pdf|max:2048',
         ]);
@@ -76,6 +79,7 @@ class UploadsController extends Controller
      */
     public function destroy(Upload $upload)
     {
+        Gate::authorize('delete', Upload::class);
         Storage::disk("public")->delete($upload->path);
         $upload->delete();
         return response()->json(['message' => 'File deleted', 'data' => $upload]);

@@ -3,42 +3,38 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Services\UserService;
+use Illuminate\Support\Facades\Gate;
 
 class AdminController extends Controller
 {
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
     public function index() {
+        Gate::authorize('viewAny', User::class);
         $admins = User::where('role','admin' )->get();
         return response()->json($admins);
     }
 
-    public function store(Request $request)
+    public function store(AdminRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|min:2',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-        ]);
-
-        $admin = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => 'admin',
-            'password' => bcrypt($request->password),
-        ]);
-
+        Gate::authorize('create', User::class);
+        $data = $this->userService->createAdmin($request);
         return response()->json([
-            'message' => 'Admin created',
-            'data' => $admin
+            'message' => $data['message'],
+            'data' => $data['object']
         ]);
     }
 
     public function destroy(User $admin)
     {
-        if (auth()->id() == $admin->id) {
-            return response()->json(['error' => 'Nemôžete odstrániť sami seba.'], 403);
-        }
+        Gate::authorize('delete', $admin);
         $admin->delete();
         return response()->json(['message' => 'Admin deleted', 'data' => $admin]);
     }

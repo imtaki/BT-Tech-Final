@@ -9,6 +9,7 @@ export default function EditSubpage() {
     const navigate = useNavigate();
     const {id} = useParams();
     const [subpage, setSubpage] = useState<subpageData>();
+    const [authorized, setAuthorized] = useState<boolean | null>(null);
 
     useEffect(() => {
         const checkAuthorization = async () => {
@@ -16,12 +17,14 @@ export default function EditSubpage() {
                 const res = await api.get("/role-check");
                 if (res.data.message === "editor") {
                     const res = await api.get(`/subpages/by-slug/${id}`);
-                    const subpage_id = res.data.id;
-                    await api.get(`/subpages/by-slug/${subpage_id}/edit`);
+                    const subpageId = res.data.id;
+                    await api.get(`/subpages/edit/${subpageId}`);
                 }
+                setAuthorized(true);
             } catch (e) {
                 console.error(e);
                 navigate("/");
+                setAuthorized(false);
             }
         }
         checkAuthorization();
@@ -40,6 +43,9 @@ export default function EditSubpage() {
         getSubpageData();
     }, []);
 
+    if (!authorized) {
+        return null
+    }
 
     if (!subpage) {
         return (

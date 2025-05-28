@@ -2,6 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Pages;
+use App\Models\Subpages;
+use App\Models\User;
+use App\Policies\PagesPolicy;
+use App\Policies\SubpagePolicy;
+use App\Policies\UserPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
